@@ -18,16 +18,16 @@ class TwoButtonShutter(PVGroup):
     2. When self.open_cmd/close_cmd is set to 'Open'/'Close', or 1/1 the
     sequence of events is:
         i. If self.status is equal to 'Open'/'Not Open' then set self.open_cmd/
-        self.close_cmd to 'idle' or 0.
+        self.close_cmd to 'Idle' or 0.
         ii. Else wait XX seconds then set self.status to 'Open'/'Not Open'
 
     """
 
     # Shutter properties
     open_cmd = pvproperty(name=':Cmd:Opn-Cmd', dtype=ChannelType.ENUM,
-                          value='idle', enum_strings=['idle', 'Open'])
+                          value='Idle', enum_strings=['Idle', 'Open'])
     close_cmd = pvproperty(name=':Cmd:Cls-Cmd', dtype=ChannelType.ENUM,
-                           value='idle', enum_strings=['idle', 'Close'])
+                           value='idle', enum_strings=['Idle', 'Close'])
     status = pvproperty(name=':Pos-Sts', value='Open', read_only=True,
                         report_as_string=True)
     fail_to_close = pvproperty(name=':Sts:FailCls-Sts', value='False',
