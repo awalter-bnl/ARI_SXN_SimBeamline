@@ -9,7 +9,18 @@ class TwoButtonShutter(PVGroup):
 
     A PVGroup that simulates the standard IOC for an NSLS-II TwoButtonShutter
     device, which includes photon shutters, pneumatic gate-valves and
-    angle-valves
+    angle-valves.
+
+    NOTES:
+    1. Unless otherwise listed in the notes below the PVs generated are 'Dummy'
+    PVs that are not modified by any inputs, or modify any other PVs, except
+    there own values when they are updated.
+    2. When self.open_cmd/close_cmd is set to 'Open'/'Close', or 1/1 the
+    sequence of events is:
+        i. If self.status is equal to 'Open'/'Not Open' then set self.open_cmd/
+        self.close_cmd to 'idle' or 0.
+        ii. Else wait XX seconds then set self.status to 'Open'/'Not Open'
+
     """
 
     # Shutter properties
@@ -25,7 +36,6 @@ class TwoButtonShutter(PVGroup):
                               read_only=True, report_as_string=True)
     enable_status = pvproperty(name=':Enbl-Sts', value='True',
                                read_only=True, report_as_string=True)
-    # Add extra required PV's
 
 
 # Add some code to start a version of the server if this file is 'run'.
