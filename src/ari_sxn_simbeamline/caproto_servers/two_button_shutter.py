@@ -19,6 +19,13 @@ class TwoButtonShutter(PVGroup):
                            value='idle', enum_strings=['idle', 'Close'])
     status = pvproperty(name=':Pos-Sts', value='Open', read_only=True,
                         report_as_string=True)
+    fail_to_close = pvproperty(name=':Sts:FailCls-Sts', value='False',
+                               read_only=True, report_as_string=True)
+    fail_to_open = pvproperty(name=':Sts:FailOpn-Sts', value='False',
+                              read_only=True, report_as_string=True)
+    enable_status = pvproperty(name=':Enbl-Sts', value='True',
+                               read_only=True, report_as_string=True)
+    # Add extra required PV's
 
 
 # Add some code to start a version of the server if this file is 'run'.
