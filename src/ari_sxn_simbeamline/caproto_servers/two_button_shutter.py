@@ -24,7 +24,7 @@ class TwoButtonShutter(PVGroup):
 
     """
 
-    def __init__(self, *args, actuation_time=3, **kwargs):
+    def __init__(self, *args, actuation_time=1.5, **kwargs):
         """
         An init function that sets an attribute called _activation_time.
 
@@ -47,7 +47,7 @@ class TwoButtonShutter(PVGroup):
     open_cmd = pvproperty(name=':Cmd:Opn-Cmd', dtype=ChannelType.ENUM,
                           value='Idle', enum_strings=['Idle', 'Open'])
     close_cmd = pvproperty(name=':Cmd:Cls-Cmd', dtype=ChannelType.ENUM,
-                           value='idle', enum_strings=['Idle', 'Close'])
+                           value='Idle', enum_strings=['Idle', 'Close'])
     status = pvproperty(name=':Pos-Sts', value='Open', read_only=True,
                         report_as_string=True)
     fail_to_close = pvproperty(name=':Sts:FailCls-Sts', value='False',
@@ -70,6 +70,7 @@ class TwoButtonShutter(PVGroup):
             start_timestamp = time.time()  # record initial time
             while time.time() - start_timestamp < obj._actuation_time:
                 time.sleep(1E-3)
+            await obj.status.write('Open')
 
         return 'Idle'
 
@@ -86,7 +87,7 @@ class TwoButtonShutter(PVGroup):
             start_timestamp = time.time()  # record initial time
             while time.time() - start_timestamp < obj._actuation_time:
                 time.sleep(1E-3)
-
+            await obj.status.write('Not Open')
         return 'Idle'
 
 
