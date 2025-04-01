@@ -1,9 +1,12 @@
 import numpy as np
 import random
+from transformations import Transform
 import xrt.backends.raycing.sources as xrt_source
 import xrt.backends.raycing.apertures as xrt_aperture
 import xrt.backends.raycing.screens as xrt_screen
 import xrt.backends.raycing.oes as xrt_oes
+
+_transform = Transform()
 
 
 class TestBase:
@@ -109,20 +112,29 @@ def _update_parameters(obj, updated=False):
     """
     for parameter, origin in obj._parameter_map.items():
         if parameter == 'center':
-            origin = np.dot(obj._transform_matrix, origin)
-            origin[1] += obj._y_offset
-            origin = tuple(origin)
+            # convert to XRT global coordinates
+            nsls2_local = np.concatenate(np.array(origin), np.array([0, 0, 0]))
+            xrt_global = _transform.nsls2_local.to_xrt_global(nsls2_local,
+                                                              obj.origin)
+            xrt_origin = tuple(xrt_global[:3])
+            # get current xrt model version
             current = getattr(obj, 'center')
-            if origin != current:
+            if xrt_origin != current:
                 updated = True
-                setattr(obj, 'center', origin)
+                setattr(obj, 'center', xrt_origin)
         elif parameter == 'angles':
+            # convert to XRT local coordinates
+            nsls2_local = np.concatenate(np.array([0, 0, 0]), np.array(origin))
+            xrt_local = _transform.nsls2_local.to_xrt_global(nsls2_local,
+                                                             obj.origin)
+            xrt_origin = tuple(xrt_local[:3])
+            # get current xrt model version
             current = tuple([getattr(obj, angle)
                              for angle in ['pitch', 'roll', 'yaw']])
-            if origin != current:
+            if xrt_origin != current:
                 updated = True
                 for i, angle in enumerate(['pitch', 'roll', 'yaw']):
-                    setattr(obj, angle, origin[i])
+                    setattr(obj, angle, xrt_origin[i])
         else:
             if getattr(obj, parameter) != origin:
                 updated = True
@@ -242,13 +254,12 @@ class ID29Source(xrt_source.GeometricSource):
         have been changed or if updated=True.
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 transform_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+                 origin=np.array([0, 0, 0, 0, 0, 0]),
                  **kwargs):
         super().__init__(*args, center=center, **kwargs)
         self.beamOut = None  # Output in global coordinate!
         self._default_parameter_map = parameter_map
-        self._transform_matrix = transform_matrix
-        self._y_offset = center[1]
+        self.origin = origin
 
     @property
     def _parameter_map(self):
@@ -336,12 +347,11 @@ class ID29OE(xrt_oes.OE):
     center : list or tuple.
         A 3 element list or tuple that defines the x, y, z position of the
         center element in XRT coordinates, i.e., (x, y, z).
-    transform_matrix : np.array
-        A 3x3 numpy array that is the transformation matrix between the input
-        'centre' and 'angle' coordinate system and the xrt coordinate system.
+    origin : np.array
+        A 1x6 array that is the origin of the component in NSLS-II
+        global coordinates, see doc-string for coordinate description.
     *args : arguments
         The arguments passed to the parent 'xrt.backends.raycing.oes.OE' class.
-
     **kwargs : keyword arguments
         The keyword arguments passed to the parent 'xrt.backends.raycing.oes.OE'
         class.
@@ -371,17 +381,16 @@ class ID29OE(xrt_oes.OE):
     """
 
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 transform_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+                 origin=np.array([0, 0, 0, 0, 0, 0]),
                  upstream=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
         self.beamIn = None  # Input in global coordinate!
         self.beamOut = None  # Output in global coordinate!
         self.beamOutloc = None  # Output in local coordinate!
-        self._transform_matrix = transform_matrix
+        self.origin = origin
         self._default_parameter_map = parameter_map
         self._upstream = upstream  # Object from modified XRT
-        self._y_offset = center[1]
 
     @property
     def _parameter_map(self):
@@ -470,9 +479,9 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
     center : list or tuple.
         A 3 element list or tuple that defines the x, y, z position of the
         center element in XRT coordinates, i.e., (x, y, z).
-    transform_matrix : np.array
-        A 3x3 numpy array that is the transformation matrix between the input
-        'centre' and 'angle' coordinate system and the xrt coordinate system.
+    origin : np.array
+        A 1x6 array that is the origin of the component in NSLS-II
+        global coordinates, see doc-string for coordinate description.
     *args : arguments
         The arguments passed to the parent
         'xrt.backends.raycing.apertures.RectangularAperture' class.
@@ -503,16 +512,15 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
 
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 transform_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+                 origin=np.array([0, 0, 0, 0, 0, 0]),
                  upstream=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
         self.beamIn = None  # Input in global coordinate!
         self.beamOut = None  # Output in global coordinate!
-        self._transform_matrix = transform_matrix
+        self.origin = origin
         self._default_parameter_map = parameter_map
         self._upstream = upstream  # Object from modified XRT
-        self._y_offset = center[1]
 
     @property
     def _parameter_map(self):
@@ -603,9 +611,9 @@ class ID29Screen(xrt_screen.Screen):
     center : list or tuple.
         A 3 element list or tuple that defines the x, y, z position of the
         center element in XRT coordinates, i.e., (x, y, z).
-    transform_matrix : np.array
-        A 3x3 numpy array that is the transformation matrix between the input
-        'centre' and 'angle' coordinate system and the xrt coordinate system.
+    origin : np.array
+        A 1x6 array that is the origin of the component in NSLS-II
+        global coordinates, see doc-string for coordinate description.
     *args : arguments
         The arguments passed to the parent
         'xrt.backends.raycing.screens.Screen' class.
@@ -634,16 +642,15 @@ class ID29Screen(xrt_screen.Screen):
 
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 transform_matrix=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]),
+                 origin=np.array([0, 0, 0, 0, 0, 0]),
                  upstream=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
         self.beamIn = None  # Input in global coordinate!
         self.beamOut = None  # Output in global coordinate!
-        self._transform_matrix = transform_matrix
+        self.origin = origin
         self._default_parameter_map = parameter_map
         self._upstream = upstream  # Object from modified XRT
-        self._y_offset = center[1]
 
     @property
     def _parameter_map(self):
