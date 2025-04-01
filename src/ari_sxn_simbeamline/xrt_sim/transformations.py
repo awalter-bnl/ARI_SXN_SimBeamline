@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def _rotation_matrix(angles):
     """
     A function that calculates the rotation matrix for a given set of angles.
@@ -98,48 +101,48 @@ def _nsls2_local_to_nsls2global(nsls2_local, origin):
 
 def _nsls2_global_to_nsls2_local(nsls2_global, origin):
     """
-        A method that converts the coordinates from NSLS-II global to NSLS-II
-        local coordinates.
+    A method that converts the coordinates from NSLS-II global to NSLS-II
+    local coordinates.
 
-        In this method the NSLSII local coordinates are in the form:
+    In this method the NSLSII local coordinates are in the form:
 
-         $(x_{l}, y_{l}, z_{l}, Rx_{l}, Ry_{l}, Rz_{l})$
+     $(x_{l}, y_{l}, z_{l}, Rx_{l}, Ry_{l}, Rz_{l})$
 
-         where: $x_{l}, y_{l}, z_{l}$ are the coordinates in local NSLSII
-            coordinates and $Rx_{l}, Ry_{l}, Rz_{l}$ are the angles around each
-            axis defining the outgoing beam direction in local NSLSII
-            coordinates.
+     where: $x_{l}, y_{l}, z_{l}$ are the coordinates in local NSLSII
+        coordinates and $Rx_{l}, Ry_{l}, Rz_{l}$ are the angles around each
+        axis defining the outgoing beam direction in local NSLSII
+        coordinates.
 
-        In this method the NSLSII global coordinates are in the form:
+    In this method the NSLSII global coordinates are in the form:
 
-         $(x_{g}, y_{g}, z_{g}, Rx_{g}, Ry_{g}, Rz_{g})$
+     $(x_{g}, y_{g}, z_{g}, Rx_{g}, Ry_{g}, Rz_{g})$
 
-         where: $x_{g}, y_{g}, z_{g}$ are the coordinates in local NSLSII
-            coordinates and $Rx_{g}, Ry_{g}, Rz_{g}$ are the angles around each
-            axis defining incoming beam direction in global NSLSII
-            coordinates.
+     where: $x_{g}, y_{g}, z_{g}$ are the coordinates in local NSLSII
+        coordinates and $Rx_{g}, Ry_{g}, Rz_{g}$ are the angles around each
+        axis defining incoming beam direction in global NSLSII
+        coordinates.
 
-        This function uses a rotation matrix to first rotate the local coordinates
-        to be parallel to the global coordinates and them translates them via the
-        origin coordinates. This works because the local NSLS-II coordinates are
-        always defined with the z axis along the incoming beam direction and the y
-        axis nominally vertical.
+    This function uses a rotation matrix to first rotate the local coordinates
+    to be parallel to the global coordinates and them translates them via the
+    origin coordinates. This works because the local NSLS-II coordinates are
+    always defined with the z axis along the incoming beam direction and the y
+    axis nominally vertical.
 
-        Parameters
-        ----------
-        nsls2_global : np.array, list or tuple.
-            A 1x6 array that is the coordinates in NSLS-II global
-            coordinates, see doc-string for coordinate description.
-        origin : np.array
-            A 1x6 array that is the origin of the component in NSLS-II
-            global coordinates, see doc-string for coordinate description.
+    Parameters
+    ----------
+    nsls2_global : np.array, list or tuple.
+        A 1x6 array that is the coordinates in NSLS-II global
+        coordinates, see doc-string for coordinate description.
+    origin : np.array
+        A 1x6 array that is the origin of the component in NSLS-II
+        global coordinates, see doc-string for coordinate description.
 
-        Returns
-        -------
-        nsls2_local : np.array
-            A 1x6 numpy array that is the coordinates in NSLS-II local
-            coordinates.
-        """
+    Returns
+    -------
+    nsls2_local : np.array
+        A 1x6 numpy array that is the coordinates in NSLS-II local
+        coordinates.
+    """
     # Convert the local and origin to 1x3 numpy arrays
     global_coords = np.array(nsls2_global[:3])
     global_angles = np.array(nsls2_global[3:])
@@ -217,44 +220,44 @@ def _nsls2_global_to_xrt_global(nsls2_global):
 
 def _xrt_global_to_nsls2_global(xrt_global):
     """
-        A method that converts the coordinates from XRT global to NSLSII global
+    A method that converts the coordinates from XRT global to NSLSII global
+    coordinates.
+
+    In this method the NSLSII global coordinates are in the form:
+
+     $(x_{g}, y_{g}, z_{g}, Rx_{g}, Ry_{g}, Rz_{g})$
+
+     where: $x_{g}, y_{g}, z_{g}$ are the coordinates in local NSLSII
+        coordinates and $Rx_{g}, Ry_{g}, Rz_{g}$ are the angles around each
+        axis defining the outgoing beam direction in global NSLSII
         coordinates.
 
-        In this method the NSLSII global coordinates are in the form:
+    In this method the XRT global coordinates are in the form:
+    $$
+    (x_{g}^{xrt}, y_{g}^{xrt}, z_{g}^{xrt},
+     Rx_{g}^{xrt}, Ry_{g}^{xrt}, Rz_{g}^{xrt})
+    $$
 
-         $(x_{g}, y_{g}, z_{g}, Rx_{g}, Ry_{g}, Rz_{g})$
+     where: $x_{g}^{xrt}, y_{g}^{xrt}, z_{g}^{xrt}$ are the coordinates in
+        global NSLSII coordinates and $Rx_{g}^{xrt}, Ry_{g}^{xrt}, Rz_{g}^{xrt}$
+        are the angles around each axis defining incoming beam direction in
+        global XRT coordinates.
 
-         where: $x_{g}, y_{g}, z_{g}$ are the coordinates in local NSLSII
-            coordinates and $Rx_{g}, Ry_{g}, Rz_{g}$ are the angles around each
-            axis defining the outgoing beam direction in global NSLSII
-            coordinates.
+    This function uses a rotation matrix, defined as swapping the y and z
+    axes, to rotate the NSLSII global coordinates into XRT global
+    coordinates.
 
-        In this method the XRT global coordinates are in the form:
-        $$
-        (x_{g}^{xrt}, y_{g}^{xrt}, z_{g}^{xrt},
-         Rx_{g}^{xrt}, Ry_{g}^{xrt}, Rz_{g}^{xrt})
-        $$
+    Parameters
+    ----------
+    xrt_global : np.array, list or tuple.
+        A 1x6 array that is the coordinates in NSLS-II global
+        coordinates, see doc-string for coordinate description.
 
-         where: $x_{g}^{xrt}, y_{g}^{xrt}, z_{g}^{xrt}$ are the coordinates in
-            global NSLSII coordinates and $Rx_{g}^{xrt}, Ry_{g}^{xrt}, Rz_{g}^{xrt}$
-            are the angles around each axis defining incoming beam direction in
-            global XRT coordinates.
-
-        This function uses a rotation matrix, defined as swapping the y and z
-        axes, to rotate the NSLSII global coordinates into XRT global
-        coordinates.
-
-        Parameters
-        ----------
-        xrt_global : np.array, list or tuple.
-            A 1x6 array that is the coordinates in NSLS-II global
-            coordinates, see doc-string for coordinate description.
-
-        Returns
-        -------
-        nsls2_global : np.array
-            A 1x6 numpy array that is the coordinates in XRT global coordinates.
-        """
+    Returns
+    -------
+    nsls2_global : np.array
+        A 1x6 numpy array that is the coordinates in XRT global coordinates.
+    """
     # Convert the local and origin to 1x3 numpy arrays
     xrt_coords = np.array(xrt_global[:3])
     xrt_angles = np.array(xrt_global[3:])
@@ -272,12 +275,138 @@ def _xrt_global_to_nsls2_global(xrt_global):
     return nsls2_global
 
 
-# Transformation of coordinates between XRT and NSLS-II.
-transform_NSLS2XRT = {'inboard': np.array([[0, -1.0, 0], [0, 0, 1.0],
-                                           [-1.0, 0, 0]]),
-                      'outboard': np.array([[0, 1.0, 0], [0, 0, 1.0],
-                                            [1.0, 0, 0]]),
-                      'downward': np.array([[1.0, 0, 0], [0, 0, 1.0],
-                                            [0, -1.0, 0]]),
-                      'upward': np.array([[-1.0, 0, 0], [0, 0, 1.0],
-                                          [0, 1.0, 0]])}
+class _Nsls2_local():
+    """
+    A class that contains the NSLS-II local coordinates transformations.
+
+    This class contains the methods to transform between NSLS-II local
+    coordinates and  NSLS-II global, XRT local and XRT global coordinates. The
+    transformations are done using rotation matrices and translations.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+
+    def __init__(self):
+        pass
+
+    def to_nsls2_global(self, nsls2_local, origin):
+        """
+        Convert NSLS-II local coordinates to NSLS-II global coordinates.
+
+        Parameters
+        ----------
+        nsls2_local : np.array, list or tuple.
+            A 1x6 array that is the coordinates in NSLS-II local
+            coordinates, see doc-string for coordinate description.
+        origin : np.array
+            A 1x6 array that is the origin of the component in NSLS-II
+            global coordinates, see doc-string for coordinate description.
+
+        Returns
+        -------
+        nsls2_global : np.array
+            A 1x6 numpy array that is the coordinates in NSLS-II global
+            coordinates.
+        """
+        return _nsls2_local_to_nsls2global(nsls2_local, origin)
+
+    def to_xrt_global(self, nsls2_local, origin):
+        """
+        Convert NSLS-II local coordinates to XRT global coordinates.
+
+        Parameters
+        ----------
+        nsls2_local : np.array, list or tuple.
+            A 1x6 array that is the coordinates in NSLS-II local
+            coordinates, see doc-string for coordinate description.
+        origin : np.array
+            A 1x6 array that is the origin of the component in NSLS-II
+            global coordinates, see doc-string for coordinate description.
+
+        Returns
+        -------
+        xrt_global : np.array
+            A 1x6 numpy array that is the coordinates in XRT global
+            coordinates.
+        """
+        nsls2_global = _nsls2_local_to_nsls2global(nsls2_local, origin)
+        return _nsls2_global_to_xrt_global(nsls2_global)
+
+    def to_xrt_local(self, nsls2_local, origin):
+        """
+        Convert NSLS-II local coordinates to XRT local coordinates.
+
+        Parameters
+        ----------
+        nsls2_local : np.array, list or tuple.
+            A 1x6 array that is the coordinates in NSLS-II local
+            coordinates, see doc-string for coordinate description.
+        origin : np.array
+            A 1x6 array that is the origin of the component in NSLS-II
+            global coordinates, see doc-string for coordinate description.
+
+        Returns
+        -------
+        xrt_local : np.array
+            A 1x6 numpy array that is the coordinates in XRT local
+            coordinates.
+        """
+        xrt_global = self.to_xrt_global(nsls2_local, origin)
+        xrt_origin = _nsls2_global_to_xrt_global(origin)
+        xrt_local = xrt_global - xrt_origin
+
+        return xrt_local
+
+
+class _Nsls2():
+    """
+    A class that contains the NSLS-II coordinates transformations.
+
+    This class contains the methods to transform between NSLS-II local and
+    NSLS-II global coordinates and  NSLS-II local, NSLS-II global, XRT local and
+    XRT global coordinates. The transformations are done using rotation matrices
+    and translations.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+
+    def __init__(self):
+        pass
+
+    local = _Nsls2_local()
+
+
+class Transform():
+    """
+    A class that contains the transformation methods between NSLS-II and XRT
+    coordinates.
+
+    This class contains the methods to transform between NSLS-II local,
+    NSLS-II global, XRT local and XRT global coordinates. The transformations
+    are done using rotation matrices and translations.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
+
+    def __init__(self):
+        pass
+
+    nsls2 = _Nsls2()
