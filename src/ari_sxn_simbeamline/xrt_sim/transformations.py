@@ -275,7 +275,7 @@ def _xrt_global_to_nsls2_global(xrt_global):
     return nsls2_global
 
 
-class _Nsls2_local():
+class _Nsls2_local:
     """
     A class that contains the NSLS-II local coordinates transformations.
 
@@ -364,14 +364,13 @@ class _Nsls2_local():
         return xrt_local
 
 
-class _Nsls2():
+class _Nsls2_global:
     """
-    A class that contains the NSLS-II coordinates transformations.
+    A class that contains the NSLS-II global coordinates transformations.
 
-    This class contains the methods to transform between NSLS-II local and
-    NSLS-II global coordinates and  NSLS-II local, NSLS-II global, XRT local and
-    XRT global coordinates. The transformations are done using rotation matrices
-    and translations.
+    This class contains the methods to transform between NSLS-II global
+    coordinates and  NSLS-II local, XRT local and XRT global coordinates. The
+    transformations are done using rotation matrices and translations.
 
     Parameters
     ----------
@@ -385,10 +384,73 @@ class _Nsls2():
     def __init__(self):
         pass
 
-    local = _Nsls2_local()
+    def to_nsls2_local(self, nsls2_global, origin):
+        """
+        Convert NSLS-II local coordinates to NSLS-II global coordinates.
+
+        Parameters
+        ----------
+        nsls2_global : np.array, list or tuple.
+            A 1x6 array that is the coordinates in NSLS-II global
+            coordinates, see doc-string for coordinate description.
+        origin : np.array
+            A 1x6 array that is the origin of the component in NSLS-II
+            global coordinates, see doc-string for coordinate description.
+
+        Returns
+        -------
+        nsls2_local : np.array
+            A 1x6 numpy array that is the coordinates in NSLS-II global
+            coordinates.
+        """
+        return _nsls2_global_to_nsls2_local(nsls2_global, origin)
+
+    def to_xrt_global(self, nsls2_global):
+        """
+        Convert NSLS-II local coordinates to XRT global coordinates.
+
+        Parameters
+        ----------
+        nsls2_global : np.array, list or tuple.
+            A 1x6 array that is the coordinates in NSLS-II global
+            coordinates, see doc-string for coordinate description.
+
+        Returns
+        -------
+        xrt_global : np.array
+            A 1x6 numpy array that is the coordinates in XRT global
+            coordinates.
+        """
+
+        return _nsls2_global_to_xrt_global(nsls2_global)
+
+    def to_xrt_local(self, nsls2_global, origin):
+        """
+        Convert NSLS-II global coordinates to XRT local coordinates.
+
+        Parameters
+        ----------
+        nsls2_global : np.array, list or tuple.
+            A 1x6 array that is the coordinates in NSLS-II global
+            coordinates, see doc-string for coordinate description.
+        origin : np.array
+            A 1x6 array that is the origin of the component in NSLS-II
+            global coordinates, see doc-string for coordinate description.
+
+        Returns
+        -------
+        xrt_local : np.array
+            A 1x6 numpy array that is the coordinates in XRT local
+            coordinates.
+        """
+        xrt_global = self.to_xrt_global(nsls2_global)
+        xrt_origin = _nsls2_global_to_xrt_global(origin)
+        xrt_local = xrt_global - xrt_origin
+
+        return xrt_local
 
 
-class Transform():
+class Transform:
     """
     A class that contains the transformation methods between NSLS-II and XRT
     coordinates.
@@ -409,4 +471,5 @@ class Transform():
     def __init__(self):
         pass
 
-    nsls2 = _Nsls2()
+    nsls2_local = _Nsls2_local()
+    nsls2_global = _Nsls2_global()
