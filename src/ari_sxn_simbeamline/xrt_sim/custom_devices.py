@@ -120,7 +120,7 @@ def _rotation_matrix(angles):
     return rot_matrix
 
 
-def _NSLS2_local_to_NSLS2global(nsls2_local, origin):
+def _nsls2_local_to_nsls2global(nsls2_local, origin):
     """
     A method that converts the coordinates from NSLS-II local to NSLS-II
     global coordinates.
@@ -183,7 +183,7 @@ def _NSLS2_local_to_NSLS2global(nsls2_local, origin):
     return nsls2_global
 
 
-def _NSLS2_global_to_NSLS2_local(nsls2_global, origin):
+def _nsls2_global_to_nsls2_local(nsls2_global, origin):
     """
         A method that converts the coordinates from NSLS-II global to NSLS-II
         local coordinates.
@@ -246,7 +246,7 @@ def _NSLS2_global_to_NSLS2_local(nsls2_global, origin):
     return nsls2_local
 
 
-def _NSLS2_global_to_XRT_global(nsls2):
+def _nsls2_global_to_xrt_global(nsls2_global):
     """
     A method that converts the coordinates from NSLS-II global to XRT global
     coordinates.
@@ -276,7 +276,7 @@ def _NSLS2_global_to_XRT_global(nsls2):
 
     Parameters
     ----------
-    nsls2 : np.array, list or tuple.
+    nsls2_global : np.array, list or tuple.
         A 1x6 array that is the coordinates in NSLS-II global
         coordinates, see doc-string for coordinate description.
 
@@ -286,8 +286,8 @@ def _NSLS2_global_to_XRT_global(nsls2):
         A 1x6 numpy array that is the coordinates in XRT global coordinates.
     """
     # Convert the local and origin to 1x3 numpy arrays
-    nsls2_coords = np.array(nsls2[:3])
-    nsls2_angles = np.array(nsls2[3:])
+    nsls2_coords = np.array(nsls2_global[:3])
+    nsls2_angles = np.array(nsls2_global[3:])
 
     # rotation matrix which is swapping the z axis for the y axis
     rotation_matrix = np.array([[0, -1.0, 0], [0, 0, 1.0], [-1.0, 0, 0]])
@@ -300,6 +300,63 @@ def _NSLS2_global_to_XRT_global(nsls2):
     xrt_global = np.concatenate((xrt_coords, xrt_angles))
 
     return xrt_global
+
+
+def _xrt_global_to_nsls2_global(xrt_global):
+    """
+        A method that converts the coordinates from XRT global to NSLSII global
+        coordinates.
+
+        In this method the NSLSII global coordinates are in the form:
+
+         $(x_{g}, y_{g}, z_{g}, Rx_{g}, Ry_{g}, Rz_{g})$
+
+         where: $x_{g}, y_{g}, z_{g}$ are the coordinates in local NSLSII
+            coordinates and $Rx_{g}, Ry_{g}, Rz_{g}$ are the angles around each
+            axis defining the outgoing beam direction in global NSLSII
+            coordinates.
+
+        In this method the XRT global coordinates are in the form:
+        $$
+        (x_{g}^{xrt}, y_{g}^{xrt}, z_{g}^{xrt},
+         Rx_{g}^{xrt}, Ry_{g}^{xrt}, Rz_{g}^{xrt})
+        $$
+
+         where: $x_{g}^{xrt}, y_{g}^{xrt}, z_{g}^{xrt}$ are the coordinates in
+            global NSLSII coordinates and $Rx_{g}^{xrt}, Ry_{g}^{xrt}, Rz_{g}^{xrt}$
+            are the angles around each axis defining incoming beam direction in
+            global XRT coordinates.
+
+        This function uses a rotation matrix, defined as swapping the y and z
+        axes, to rotate the NSLSII global coordinates into XRT global
+        coordinates.
+
+        Parameters
+        ----------
+        xrt_global : np.array, list or tuple.
+            A 1x6 array that is the coordinates in NSLS-II global
+            coordinates, see doc-string for coordinate description.
+
+        Returns
+        -------
+        nsls2_global : np.array
+            A 1x6 numpy array that is the coordinates in XRT global coordinates.
+        """
+    # Convert the local and origin to 1x3 numpy arrays
+    xrt_coords = np.array(xrt_global[:3])
+    xrt_angles = np.array(xrt_global[3:])
+
+    # rotation matrix which is swapping the z axis for the y axis
+    rotation_matrix = np.array([[0, -1.0, 0], [0, 0, 1.0], [-1.0, 0, 0]])
+
+    # rotate the NSLS-II coordinates and angles into XRT coordinates and angles
+    nsls2_coords = np.dot(rotation_matrix, xrt_coords)
+    nsls2_angles = np.dot(rotation_matrix, xrt_angles)
+
+    # combine the global coordinates and angles into a single array
+    nsls2_global = np.concatenate((nsls2_coords, nsls2_angles))
+
+    return nsls2_global
 
 
 # Transformation of coordinates between XRT and NSLS-II.
