@@ -1,5 +1,5 @@
 from custom_devices import (ID29Source, ID29OE, ID29Aperture, ID29Screen,
-                            TestM1, transform_NSLS2XRT)
+                            TestM1)
 import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
@@ -152,7 +152,7 @@ class AriModel:
                         parameter_map={'center': {'x': 0, 'y': 0, 'z': 0},
                                        'angles': {'pitch': 0, 'roll': 0,
                                                   'yaw': 0}},
-                        transform_matrix=transform_NSLS2XRT['upward'])
+                        origin=None)
 
     # Add the M1 to beamline object bl
     # TODO: This should be an elliptical mirror that focuses the beam.
@@ -167,10 +167,10 @@ class AriModel:
                 parameter_map={'center': {'x': (mirror1, 'x'),
                                           'y': (mirror1, 'y'),
                                           'z': 0},
-                               'angles': {'pitch': (mirror1, 'Ry'),
-                                          'roll': (mirror1, 'Rz'),
-                                          'yaw': 0}},
-                transform_matrix=transform_NSLS2XRT['inboard'])
+                               'angles': {'Rx': 0,
+                                          'Ry': (mirror1, 'Ry'),
+                                          'Rz': (mirror1, 'Rz')}},
+                origin=None)
 
     # Add the M1 Baffle slit to beamline object bl
     m1_baffles = ID29Aperture(bl=bl,
@@ -189,7 +189,7 @@ class AriModel:
                                               'bottom': (mirror1.baffles,
                                                          'bottom'),
                                               'top': (mirror1.baffles, 'top')}},
-                              transform_matrix=transform_NSLS2XRT['upward'])
+                              origin=None)
 
     # Add one screen at M1 diagnostic to monitor the beam
     # NOTE: the IOC needs to select the right region based on diag position
@@ -201,7 +201,7 @@ class AriModel:
                          z=np.array([0, 0, 1]),
                          upstream=m1_baffles,
                          parameter_map={},
-                         transform_matrix=transform_NSLS2XRT['upward'])
+                         origin=None)
 
     # Add slit at M1 diagnostic to block beam when diagnostic unit is in
     m1_diag_slit = ID29Aperture(bl=bl,
@@ -216,4 +216,4 @@ class AriModel:
                                                 'bottom': -50,
                                                 'top': (mirror1.diagnostic,
                                                         'multi_trans')}},
-                                transform_matrix=transform_NSLS2XRT['upward'])
+                                origin=None)

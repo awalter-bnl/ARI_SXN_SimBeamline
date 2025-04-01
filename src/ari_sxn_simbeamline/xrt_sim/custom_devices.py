@@ -201,15 +201,13 @@ class ID29Source(xrt_source.GeometricSource):
             return calculated_Ry
 
          parameter_map = {'center':{'x':(mirror,'x'), 'y':(mirror,'y'),'z':0),
-                          'angles':{'pitch':0, 'roll':(mirror,'Ry'),
-                                    'yaw': (mirror,'Rz')}
+                          'angles':{'Rx':0, 'Ry':(mirror,'Ry'),
+                                    'Rz': (mirror,'Rz')}
 
-         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in XRT
-         global coordinates
+         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in local
+         NSLS-II coordinates.
 
-         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in XRT
-         global coordinates
-         ```
+        ```
 
         Notes:
         1.  Only parameters that can be updated for the given device should be
@@ -326,11 +324,11 @@ class ID29OE(xrt_oes.OE):
             return calculated_Ry
 
          parameter_map = {'center':{'x':(mirror,'x'), 'y':(mirror,'y'),'z':0),
-                          'angles':{'pitch':0, 'roll':(mirror,'Ry'),
-                                    'yaw': (mirror,'Rz')}
+                          'angles':{'Rx':0, 'Ry':(mirror,'Ry'),
+                                    'Rz': (mirror,'Rz')}
 
-         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in XRT
-         global coordinates
+         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in local
+         NSLS-II coordinates.
          ```
 
         Notes:
@@ -453,16 +451,12 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
             calculated_Ry = mirror.Ry_coarse + mirror.Ry_fine
             return calculated_Ry
 
-
          parameter_map = {'center':{'x':(mirror,'x'), 'y':(mirror,'y'),'z':0),
-                          'angles':{'pitch':0, 'roll':(mirror,'Ry'),
-                                    'yaw': (mirror,'Rz')}
+                          'angles':{'Rx':0, 'Ry':(mirror,'Ry'),
+                                    'Rz': (mirror,'Rz')}
 
-         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in XRT
-         global coordinates
-
-         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in XRT
-         global coordinates.
+         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in local
+         NSLS-II coordinates.
          ```
 
         Notes:
@@ -587,14 +581,11 @@ class ID29Screen(xrt_screen.Screen):
             return calculated_Ry
 
          parameter_map = {'center':{'x':(mirror,'x'), 'y':(mirror,'y'),'z':0),
-                          'angles':{'pitch':0, 'roll':(mirror,'Ry'),
-                                    'yaw': (mirror,'Rz')}
+                          'angles':{'Rx':0, 'Ry':(mirror,'Ry'),
+                                    'Rz': (mirror,'Rz')}
 
-         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in XRT
-         global coordinates
-
-         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in XRT
-         global coordinates.
+         here 'center' is (x, y, z) and 'angles' is (pitch, roll, yaw) in local
+         NSLS-II coordinates.
          ```
 
         Notes:
