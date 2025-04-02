@@ -1,5 +1,15 @@
 import numpy as np
 
+# Transformation of coordinates between XRT and NSLS-II.
+_xrt_local_to_global = {'inboard': np.array([[0, -1.0, 0], [0, 0, 1.0],
+                                             [-1.0, 0, 0]]),
+                        'outboard': np.array([[0, 1.0, 0], [0, 0, 1.0],
+                                              [1.0, 0, 0]]),
+                        'downward': np.array([[1.0, 0, 0], [0, 0, 1.0],
+                                              [0, -1.0, 0]]),
+                        'upward': np.array([[-1.0, 0, 0], [0, 0, 1.0],
+                                            [0, 1.0, 0]])}
+
 
 def _rotation_matrix(angles):
     """
@@ -339,7 +349,7 @@ class _Nsls2_local:
         nsls2_global = _nsls2_local_to_nsls2global(nsls2_local, origin)
         return _nsls2_global_to_xrt_global(nsls2_global)
 
-    def to_xrt_local(self, nsls2_local, origin):
+    def to_xrt_local(self, nsls2_local, origin, deflection='upward'):
         """
         Convert NSLS-II local coordinates to XRT local coordinates.
 
@@ -351,6 +361,10 @@ class _Nsls2_local:
         origin : np.array
             A 1x6 array that is the origin of the component in NSLS-II
             global coordinates, see doc-string for coordinate description.
+        deflection : str
+            A string that is either 'inboard', 'outboard', 'upward' or
+            'downward'. This defines the deflection direction of the optic,
+            for non optical elements the default ('upward') is used.
 
         Returns
         -------
@@ -360,7 +374,8 @@ class _Nsls2_local:
         """
         xrt_global = self.to_xrt_global(nsls2_local, origin)
         xrt_origin = _nsls2_global_to_xrt_global(origin)
-        xrt_local = xrt_global - xrt_origin
+        xrt_rotated = xrt_global - xrt_origin
+        xrt_local = np.dot(_xrt_local_to_global[deflection], xrt_rotated)
 
         return xrt_local
 
@@ -427,7 +442,7 @@ class _Nsls2_global:
         xrt_global = _nsls2_global_to_xrt_global(nsls2_global)
         return xrt_global
 
-    def to_xrt_local(self, nsls2_global, origin):
+    def to_xrt_local(self, nsls2_global, origin, deflection='upward'):
         """
         Convert NSLS-II global coordinates to XRT local coordinates.
 
@@ -439,6 +454,10 @@ class _Nsls2_global:
         origin : np.array
             A 1x6 array that is the origin of the component in NSLS-II
             global coordinates, see doc-string for coordinate description.
+        deflection : str
+            A string that is either 'inboard', 'outboard', 'upward' or
+            'downward'. This defines the deflection direction of the optic,
+            for non optical elements the default ('upward') is used.
 
         Returns
         -------
@@ -448,7 +467,8 @@ class _Nsls2_global:
         """
         xrt_global = self.to_xrt_global(nsls2_global)
         xrt_origin = _nsls2_global_to_xrt_global(origin)
-        xrt_local = xrt_global - xrt_origin
+        xrt_rotated = xrt_global - xrt_origin
+        xrt_local = np.dot(_xrt_local_to_global[deflection], xrt_rotated)
 
         return xrt_local
 
@@ -515,7 +535,7 @@ class _Xrt_global:
         nsls2_local = _nsls2_global_to_nsls2_local(nsls2_global, origin)
         return nsls2_local
 
-    def to_xrt_local(self, xrt_global, origin):
+    def to_xrt_local(self, xrt_global, origin, deflection='upward'):
         """
         Convert XRT global coordinates to XRT local coordinates.
 
@@ -529,6 +549,11 @@ class _Xrt_global:
             A 1x6 array that is the origin of the component in NSLS-II
             global coordinates, see doc-string for coordinate description.
 
+        deflection : str
+            A string that is either 'inboard', 'outboard', 'upward' or
+            'downward'. This defines the deflection direction of the optic,
+            for non optical elements the default ('upward') is used.
+
         Returns
         -------
         xrt_local : np.array
@@ -536,7 +561,8 @@ class _Xrt_global:
             coordinates.
         """
         xrt_origin = _nsls2_global_to_xrt_global(origin)
-        xrt_local = xrt_global - xrt_origin
+        xrt_rotated = xrt_global - xrt_origin
+        xrt_local = np.dot(_xrt_local_to_global[deflection], xrt_rotated)
         return xrt_local
 
 
@@ -560,7 +586,7 @@ class _Xrt_local:
     def __init__(self):
         pass
 
-    def to_xrt_global(self, xrt_local, origin):
+    def to_xrt_global(self, xrt_local, origin, deflection='upward'):
         """
         Convert XRT global coordinates to XRT local coordinates.
 
@@ -574,6 +600,11 @@ class _Xrt_local:
             A 1x6 array that is the origin of the component in NSLS-II
             global coordinates, see doc-string for coordinate description.
 
+        deflection : str
+            A string that is either 'inboard', 'outboard', 'upward' or
+            'downward'. This defines the deflection direction of the optic,
+            for non optical elements the default ('upward') is used.
+
         Returns
         -------
         xrt_global : np.array
@@ -581,10 +612,12 @@ class _Xrt_local:
             coordinates.
         """
         xrt_origin = _nsls2_global_to_xrt_global(origin)
-        xrt_global = xrt_local + xrt_origin
+        xrt_rotated = np.dot(_xrt_local_to_global[deflection].T, xrt_local)
+
+        xrt_global = xrt_rotated + xrt_origin
         return xrt_global
 
-    def to_nsls2_global(self, xrt_local, origin):
+    def to_nsls2_global(self, xrt_local, origin, deflection='upward'):
         """
         Convert XRT local coordinates to NSLS-II global coordinates.
 
@@ -596,17 +629,22 @@ class _Xrt_local:
         origin : np.array
             A 1x6 array that is the origin of the component in NSLS-II
             global coordinates, see doc-string for coordinate description.
+        deflection : str
+            A string that is either 'inboard', 'outboard', 'upward' or
+            'downward'. This defines the deflection direction of the optic,
+            for non optical elements the default ('upward') is used.
         Returns
         -------
         nsls2_global : np.array
             A 1x6 numpy array that is the coordinates in NSLS-II global
             coordinates.
         """
-        xrt_global = self.to_xrt_global(xrt_local, origin)
+        xrt_global = self.to_xrt_global(xrt_local, origin,
+                                        deflection=deflection)
         nsls2_global = _xrt_global_to_nsls2_global(xrt_global)
         return nsls2_global
 
-    def to_nsls2_local(self, xrt_local, origin):
+    def to_nsls2_local(self, xrt_local, origin, deflection='upward'):
         """
         Convert XRT local coordinates to NSLS-II local coordinates.
 
@@ -618,6 +656,10 @@ class _Xrt_local:
         origin : np.array
             A 1x6 array that is the origin of the component in NSLS-II
             global coordinates, see doc-string for coordinate description.
+        deflection : str
+            A string that is either 'inboard', 'outboard', 'upward' or
+            'downward'. This defines the deflection direction of the optic,
+            for non optical elements the default ('upward') is used.
 
         Returns
         -------
@@ -625,7 +667,8 @@ class _Xrt_local:
             A 1x6 numpy array that is the coordinates in NSLS-II local
             coordinates.
         """
-        xrt_global = self.to_xrt_global(xrt_local, origin)
+        xrt_global = self.to_xrt_global(xrt_local, origin,
+                                        deflection=deflection)
         nsls2_global = self.to_nsls2_global(xrt_global, origin)
         nsls2_local = _nsls2_global_to_nsls2_local(nsls2_global, origin)
         return nsls2_local
