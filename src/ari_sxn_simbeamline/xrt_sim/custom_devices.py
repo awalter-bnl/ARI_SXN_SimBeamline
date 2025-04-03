@@ -229,8 +229,8 @@ class ID29Source(xrt_source.GeometricSource):
         'centre' and 'angle' coordinate system and the xrt coordinate system.
     deflection : str
         A string that defines the deflection of the source, either 'upward' or
-        'downward'. This is used to set the deflection of the source in the
-        xrt coordinate system.
+        'downward', 'inboard' or 'outboard'. This is used to set the deflection
+        of the source in the xrt coordinate system, default is 'outboard'.
     *args : arguments
         The arguments passed to the parent
         'xrt.backends.raycing.sources.GeometricSource' class.
@@ -257,7 +257,7 @@ class ID29Source(xrt_source.GeometricSource):
         have been changed or if updated=True.
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='upward',
+                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='outboard',
                  **kwargs):
         super().__init__(*args, center=center, **kwargs)
         self.beamOut = None  # Output in global coordinate!
@@ -354,6 +354,11 @@ class ID29OE(xrt_oes.OE):
     origin : np.array
         A 1x6 array that is the origin of the component in NSLS-II
         global coordinates, see doc-string for coordinate description.
+    deflection : str
+        A string that defines the deflection of the source, either 'upward' or
+        'downward', 'inboard' or 'outboard'. This is used to set the deflection
+        of the optical element in the xrt coordinate system, default is
+        'outboard'.
     *args : arguments
         The arguments passed to the parent 'xrt.backends.raycing.oes.OE' class.
     **kwargs : keyword arguments
@@ -386,7 +391,7 @@ class ID29OE(xrt_oes.OE):
 
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
                  origin=np.array([0, 0, 0, 0, 0, 0]),
-                 upstream=None, deflection='upward', **kwargs):
+                 upstream=None, deflection='outboard', **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
         self.beamIn = None  # Input in global coordinate!
@@ -485,8 +490,8 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
         global coordinates, see doc-string for coordinate description.
     deflection : str
         A string that defines the deflection of the source, either 'upward' or
-        'downward'. This is used to set the deflection of the source in the
-        xrt coordinate system.
+        'downward', 'inboard' or 'outboard'. This is used to set the deflection
+        of the aperture in the xrt coordinate system, default is 'outboard'.
     *args : arguments
         The arguments passed to the parent
         'xrt.backends.raycing.apertures.RectangularAperture' class.
@@ -517,7 +522,7 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
 
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='upward',
+                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='outboard',
                  upstream=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
@@ -619,8 +624,8 @@ class ID29Screen(xrt_screen.Screen):
         global coordinates, see doc-string for coordinate description.
     deflection : str
         A string that defines the deflection of the source, either 'upward' or
-        'downward'. This is used to set the deflection of the source in the
-        xrt coordinate system.
+        'downward', 'inboard' or 'outboard'. This is used to set the deflection
+        of the screen in the xrt coordinate system, default is 'outboard'.
     *args : arguments
         The arguments passed to the parent
         'xrt.backends.raycing.screens.Screen' class.
@@ -649,7 +654,7 @@ class ID29Screen(xrt_screen.Screen):
 
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='upward',
+                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='outboard',
                  upstream=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 

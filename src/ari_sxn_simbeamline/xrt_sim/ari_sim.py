@@ -77,6 +77,19 @@ genericGR = xrt_material.Material('Ni', rho=8.908,
                                   efficiency=[(1, 1), (-1, 1)])  # efficiency=1
 
 
+# define each beamline component relative to the immediate upstream component
+# the distance to the upstream component is in mm and deflection is None for
+# non-optical components and a dictionary for optical components where the
+# deflection angle is in degrees and the direction is 'inboard', 'outboard',
+# 'upward' or 'downward'.
+ari_model_layout = {'source': {'distance': 0, 'deflection': None},
+                    'm1': {'distance': 26591.24,
+                           'deflection': {'angle': 4, 'direction': 'inboard'}},
+                    'm1_baffles': {'distance': 4503.26, 'deflection': None},
+                    'm1_diag': {'distance': 246.1, 'deflection': None},
+                    'm1_diag_slit': {'distance': 0.1, 'deflection': None}}
+
+
 # noinspection PyUnresolvedReferences
 class AriModel:
     """
