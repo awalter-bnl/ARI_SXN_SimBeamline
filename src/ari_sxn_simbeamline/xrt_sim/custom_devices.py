@@ -88,6 +88,66 @@ class TestM1(TestMirror):
         return calculated_Ry
 
 
+def _generate_origins(model_layout):
+    """
+    Generates the origin of each component in global NSLS-II coordinates.
+
+    This function generates the origin of each component of the beamline model
+    in NSLS-II global co-ordinates. The origin is a 6-vector over the form
+    (x,y,z,Rx,Ry,Rz) where x,y, and z is the center of the component and
+    Rx,Ry, and Rz are the angles around each axis defining the outgoing beam
+    direction in global NSLSII coordinates.
+
+    Parameters
+    ----------
+    model_layout : dict
+        A dictionary containing the beamline layout information, including
+        the components and their positions. The key is the component name and
+        the value is a dictionary with the component parameters 'distance' (the
+        distance from the upstream object) and 'deflection'. the 'deflection'
+        value is either None (for non-optical elements) or a dictionary with the
+        keys 'angle' (the deflection angle in degrees) and 'direction' (a
+        string being either 'inboard', 'outboard', 'upward' or 'downward')
+        indicating the deflection direction.
+
+    Returns
+    -------
+    origins : dict
+        A dictionary containing the origin of each component in NSLS-II global
+        coordinates. The key is the component name and the value is a 6-vector
+        of the form (x,y,z,Rx,Ry,Rz) as described in the doc-string.
+    """
+    previous_origin = np.array([0, 0, 0, 0, 0, 0])
+    origins = {}
+
+    for key, value in model_layout.items():
+        # generate the coordinates of the component in the NSLS-II local
+        # coordinates of the upstream component.
+        if value['deflection'] is None:
+            # non-optical element
+            angles = np.array([0, 0, 0])
+        else:
+            # optical element
+            angle = value['deflection']['angle']
+            # this transformation converts the deflection ('pitch') angle to the
+            # relevant Rx, Ry, Rz angle. It uses the xrt_global to xrt_local
+            # functions as it is the same process.......
+            angles = _transform.xrt_global.to_xrt_local(
+                nsls2_local=np.array([0, 0, 0, angle, 0, 0]),
+                origin=np.array([0, 0, 0, 0, 0, 0]),
+                deflection=value['deflection']['direction'])
+            angles = angles[:3]
+
+        nsls2_local = np.concatenate(np.array([0, 0, value['distance']]),
+                                     angles)
+
+        # convert the coordinates from above to NSLS-II global coordinates
+        # using the previous origin as this is the required 'origin'.
+        origins[key] = _transform.nsls2_local.to_nsls2_global(nsls2_local,
+                                                              previous_origin)
+
+    return origins
+
 def _update_parameters(obj, updated=False):
     """
     A generic method that updates the XRT model parameters.
