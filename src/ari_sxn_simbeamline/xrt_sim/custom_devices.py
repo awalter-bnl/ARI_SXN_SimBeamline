@@ -1,12 +1,62 @@
 import numpy as np
 import random
 from transformations import Transform
+import xarray as xr
 import xrt.backends.raycing.sources as xrt_source
 import xrt.backends.raycing.apertures as xrt_aperture
 import xrt.backends.raycing.screens as xrt_screen
 import xrt.backends.raycing.oes as xrt_oes
 
 _transform = Transform()
+
+
+# Define a function for creating xarrays from beamin/ beamout objects
+def beam_to_xarray(beam_object, bins=(100, 100, 100),
+                   output_range=((-10, 10), (-10, 10), None)):
+    """
+    Convert a beam object to an xarray object.
+
+    This function takes a beam object and converts it to an xarray object
+    with the beam properties as data variables. The xarray object is then
+    returned.
+
+    Parameters
+    ----------
+    beam_object : a beam object
+        The beam object to be converted to an xarray object.
+
+    bins : a list of integers, i.e., [100, 100, 100] (by default)
+        The number of points along each direction for the histogram.
+
+    output_range : a list of tuples, i.e., [(-1, 1), (-1, 1), (850, 850), None]
+        The range of the histogram along each direction. If None, the range
+        is automatically determined.
+
+    Returns
+    -------
+    beam_array : an xarray object
+        The xarray object with the beam properties as data variables.
+    """
+
+    # extract the required values
+    points = np.vstack([beam_object.__dict__['x'],
+                        beam_object.__dict__['z'],
+                        beam_object.__dict__['E']]).T
+
+    data, edges = np.histogramdd(points, bins=bins, range=output_range)
+
+    # convert the edges to the correct lists
+    x_coords = list(edges[0][:-1])
+    z_coords = list(edges[1][:-1])
+    E_coords = list(edges[2][:-1])
+
+    # create the xarray object
+    beam_array = xr.DataArray(data,
+                              coords={'x': x_coords, 'z': z_coords,
+                                      'E': E_coords},
+                              dims=['x', 'z', 'E'])
+
+    return beam_array
 
 
 class TestBase:
@@ -87,66 +137,6 @@ class TestM1(TestMirror):
         calculated_Ry = self.Ry_coarse + self.Ry_fine
         return calculated_Ry
 
-
-def _generate_origins(model_layout):
-    """
-    Generates the origin of each component in global NSLS-II coordinates.
-
-    This function generates the origin of each component of the beamline model
-    in NSLS-II global co-ordinates. The origin is a 6-vector over the form
-    (x,y,z,Rx,Ry,Rz) where x,y, and z is the center of the component and
-    Rx,Ry, and Rz are the angles around each axis defining the outgoing beam
-    direction in global NSLSII coordinates.
-
-    Parameters
-    ----------
-    model_layout : dict
-        A dictionary containing the beamline layout information, including
-        the components and their positions. The key is the component name and
-        the value is a dictionary with the component parameters 'distance' (the
-        distance from the upstream object) and 'deflection'. the 'deflection'
-        value is either None (for non-optical elements) or a dictionary with the
-        keys 'angle' (the deflection angle in degrees) and 'direction' (a
-        string being either 'inboard', 'outboard', 'upward' or 'downward')
-        indicating the deflection direction.
-
-    Returns
-    -------
-    origins : dict
-        A dictionary containing the origin of each component in NSLS-II global
-        coordinates. The key is the component name and the value is a 6-vector
-        of the form (x,y,z,Rx,Ry,Rz) as described in the doc-string.
-    """
-    previous_origin = np.array([0, 0, 0, 0, 0, 0])
-    origins = {}
-
-    for key, value in model_layout.items():
-        # generate the coordinates of the component in the NSLS-II local
-        # coordinates of the upstream component.
-        if value['deflection'] is None:
-            # non-optical element
-            angles = np.array([0, 0, 0])
-        else:
-            # optical element
-            angle = value['deflection']['angle']
-            # this transformation converts the deflection ('pitch') angle to the
-            # relevant Rx, Ry, Rz angle. It uses the xrt_global to xrt_local
-            # functions as it is the same process.......
-            angles = _transform.xrt_global.to_xrt_local(
-                nsls2_local=np.array([0, 0, 0, angle, 0, 0]),
-                origin=np.array([0, 0, 0, 0, 0, 0]),
-                deflection=value['deflection']['direction'])
-            angles = angles[:3]
-
-        nsls2_local = np.concatenate(np.array([0, 0, value['distance']]),
-                                     angles)
-
-        # convert the coordinates from above to NSLS-II global coordinates
-        # using the previous origin as this is the required 'origin'.
-        origins[key] = _transform.nsls2_local.to_nsls2_global(nsls2_local,
-                                                              previous_origin)
-
-    return origins
 
 def _update_parameters(obj, updated=False):
     """
@@ -287,6 +277,9 @@ class ID29Source(xrt_source.GeometricSource):
     transform_matrix : np.array
         A 3x3 numpy array that is the transformation matrix between the input
         'centre' and 'angle' coordinate system and the xrt coordinate system.
+    origin : np.array, list or tuple
+        A 1x6 array that is the origin of the component in NSLS-II global
+        coordinates, i.e., (x, y, z, Rx, Ry, Rz).
     deflection : str
         A string that defines the deflection of the source, either 'upward' or
         'downward', 'inboard' or 'outboard'. This is used to set the deflection

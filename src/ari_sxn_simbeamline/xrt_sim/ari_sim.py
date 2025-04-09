@@ -1,9 +1,8 @@
 from custom_devices import (ID29Source, ID29OE, ID29Aperture, ID29Screen,
-                            TestM1)
+                            TestM1, beam_to_xarray)
 import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
-import xarray as xr
 import xrt.backends.raycing as xrt_raycing
 import xrt.backends.raycing.materials as xrt_material
 
@@ -12,55 +11,6 @@ matplotlib.use('qtagg')
 # Define a test object to use in place of the caproto IOC for testing
 mirror1 = TestM1({'Ry_coarse': np.radians(2), 'Ry_fine': 0, 'Rz': 0,
                   'x': 0, 'y': 0})
-
-
-# Define a function for creating xarrays from beamin/ beamout objects
-def beam_to_xarray(beam_object, bins=(100, 100, 100),
-                   output_range=((-10, 10), (-10, 10), None)):
-    """
-    Convert a beam object to an xarray object.
-
-    This function takes a beam object and converts it to an xarray object
-    with the beam properties as data variables. The xarray object is then
-    returned.
-
-    Parameters
-    ----------
-    beam_object : a beam object
-        The beam object to be converted to an xarray object.
-
-    bins : a list of integers, i.e., [100, 100, 100] (by default)
-        The number of points along each direction for the histogram.
-
-    output_range : a list of tuples, i.e., [(-1, 1), (-1, 1), (850, 850), None]
-        The range of the histogram along each direction. If None, the range
-        is automatically determined.
-
-    Returns
-    -------
-    beam_array : an xarray object
-        The xarray object with the beam properties as data variables.
-    """
-
-    # extract the required values
-    points = np.vstack([beam_object.__dict__['x'],
-                        beam_object.__dict__['z'],
-                        beam_object.__dict__['E']]).T
-
-    data, edges = np.histogramdd(points, bins=bins, range=output_range)
-
-    # convert the edges to the correct lists
-    x_coords = list(edges[0][:-1])
-    z_coords = list(edges[1][:-1])
-    E_coords = list(edges[2][:-1])
-
-    # create the xarray object
-    beam_array = xr.DataArray(data,
-                              coords={'x': x_coords, 'z': z_coords,
-                                      'E': E_coords},
-                              dims=['x', 'z', 'E'])
-
-    return beam_array
 
 
 # Define optics coating material instances.
@@ -77,30 +27,25 @@ genericGR = xrt_material.Material('Ni', rho=8.908,
                                   efficiency=[(1, 1), (-1, 1)])  # efficiency=1
 
 
-# define each beamline component relative to the immediate upstream component
-# the distance to the upstream component is in mm and deflection is None for
-# non-optical components and a dictionary for optical components where the
-# deflection angle is in degrees and the direction is 'inboard', 'outboard',
-# 'upward' or 'downward'.
-ari_model_layout = {'source': {'distance': 0, 'deflection': None},
-                    'm1': {'distance': 26591.24,
-                           'deflection': {'angle': 4, 'direction': 'inboard'}},
-                    'm1_baffles': {'distance': 4503.26, 'deflection': None},
-                    'm1_diag': {'distance': 246.1, 'deflection': None},
-                    'm1_diag_slit': {'distance': 0.1, 'deflection': None}}
+# define each beamline components 'origin' in global NSLSII coordinates,
+# in the format (x, y, z, Rx, Ry, Rz) where x,y,z are the coordinates of the
+# center of the component (in mm) and Rx, Ry, Rz are the angles (in deg) of
+# rotation around the x, y, z axes respectively that define the direction of the
+# incoming beam.
+ari_model_origins = {'source': np.array([0, 0, 0, 0, 0, 0]),
+                     'm1': np.array([0, 27850, 0, 0, 0, 0]),
+                     'm1_baffles': np.array([314.13, 32342.3, 0, 0, 4, 0]),
+                     'm1_diag': np.array([331.3, 32587.8, 0, 0, 4, 0]),
+                     'm1_diag_slit': np.array([331.3, 32587.8, 0, 0, 4, 0])}
 
 
-# noinspection PyUnresolvedReferences
+# noinspection PyUnresolvedReference
 class AriModel:
     """
     The ARI beamline simulation based on XRT.
 
     This class simulates the beam propagation along the ARI beamline and gives
     the beam properties at each beamline component.
-
-    Parameters
-    ----------
-    update_comp : argument, passed to the update method.
 
     Attributes
     ----------
@@ -165,7 +110,7 @@ class AriModel:
                         parameter_map={'center': {'x': 0, 'y': 0, 'z': 0},
                                        'angles': {'pitch': 0, 'roll': 0,
                                                   'yaw': 0}},
-                        origin=None)
+                        origin=ari_model_origins['source'])
 
     # Add the M1 to beamline object bl
     # TODO: This should be an elliptical mirror that focuses the beam.
@@ -183,7 +128,8 @@ class AriModel:
                                'angles': {'Rx': 0,
                                           'Ry': (mirror1, 'Ry'),
                                           'Rz': (mirror1, 'Rz')}},
-                origin=None)
+                origin=ari_model_origins['m1'],
+                deflection='None')
 
     # Add the M1 Baffle slit to beamline object bl
     m1_baffles = ID29Aperture(bl=bl,
@@ -202,7 +148,8 @@ class AriModel:
                                               'bottom': (mirror1.baffles,
                                                          'bottom'),
                                               'top': (mirror1.baffles, 'top')}},
-                              origin=None)
+                              origin=ari_model_origins['m1_baffles'],
+                              deflection='inboard')
 
     # Add one screen at M1 diagnostic to monitor the beam
     # NOTE: the IOC needs to select the right region based on diag position
@@ -214,7 +161,8 @@ class AriModel:
                          z=np.array([0, 0, 1]),
                          upstream=m1_baffles,
                          parameter_map={},
-                         origin=None)
+                         origin=ari_model_origins['m1_diag'],
+                         deflection='None')
 
     # Add slit at M1 diagnostic to block beam when diagnostic unit is in
     m1_diag_slit = ID29Aperture(bl=bl,
@@ -229,4 +177,5 @@ class AriModel:
                                                 'bottom': -50,
                                                 'top': (mirror1.diagnostic,
                                                         'multi_trans')}},
-                                origin=None)
+                                origin=ari_model_origins['m1_diag_slit'],
+                                deflection='None')

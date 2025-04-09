@@ -195,7 +195,7 @@ def _nsls2_global_to_xrt_global(nsls2_global):
      where: $x_{g}^{xrt}, y_{g}^{xrt}, z_{g}^{xrt}$ are the coordinates in
         global NSLSII coordinates and $Rx_{g}^{xrt}, Ry_{g}^{xrt}, Rz_{g}^{xrt}$
         are the angles around each axis defining incoming beam direction in
-        global XRT coordinates.
+        global NSLSII coordinates.
 
     This function uses a rotation matrix, defined as swapping the z and y axes,
     to rotate the NSLSII global coordinates into XRT global coordinates.
@@ -251,7 +251,7 @@ def _xrt_global_to_nsls2_global(xrt_global):
      where: $x_{g}^{xrt}, y_{g}^{xrt}, z_{g}^{xrt}$ are the coordinates in
         global NSLSII coordinates and $Rx_{g}^{xrt}, Ry_{g}^{xrt}, Rz_{g}^{xrt}$
         are the angles around each axis defining incoming beam direction in
-        global XRT coordinates.
+        global NSLS-II coordinates.
 
     This function uses a rotation matrix, defined as swapping the y and z
     axes, to rotate the NSLSII global coordinates into XRT global
