@@ -129,7 +129,7 @@ class AriModel:
                                           'Ry': (mirror1, 'Ry'),
                                           'Rz': (mirror1, 'Rz')}},
                 origin=ari_model_origins['m1'],
-                deflection='None')
+                deflection='inboard')
 
     # Add the M1 Baffle slit to beamline object bl
     m1_baffles = ID29Aperture(bl=bl,
@@ -148,8 +148,7 @@ class AriModel:
                                               'bottom': (mirror1.baffles,
                                                          'bottom'),
                                               'top': (mirror1.baffles, 'top')}},
-                              origin=ari_model_origins['m1_baffles'],
-                              deflection='inboard')
+                              origin=ari_model_origins['m1_baffles'])
 
     # Add one screen at M1 diagnostic to monitor the beam
     # NOTE: the IOC needs to select the right region based on diag position
@@ -177,5 +176,4 @@ class AriModel:
                                                 'bottom': -50,
                                                 'top': (mirror1.diagnostic,
                                                         'multi_trans')}},
-                                origin=ari_model_origins['m1_diag_slit'],
-                                deflection='None')
+                                origin=ari_model_origins['m1_diag_slit'])

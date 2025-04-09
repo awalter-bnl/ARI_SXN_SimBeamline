@@ -163,7 +163,8 @@ def _update_parameters(obj, updated=False):
     for parameter, origin in obj._parameter_map.items():
         if parameter == 'center':
             # convert to XRT global coordinates
-            nsls2_local = np.concatenate(np.array(origin), np.array([0, 0, 0]))
+            nsls2_local = np.concatenate((np.array(origin),
+                                          np.array([0, 0, 0])))
             xrt_global = _transform.nsls2_local.to_xrt_global(nsls2_local,
                                                               obj.origin)
             xrt_origin = tuple(xrt_global[:3])
@@ -174,7 +175,8 @@ def _update_parameters(obj, updated=False):
                 setattr(obj, 'center', xrt_origin)
         elif parameter == 'angles':
             # convert to XRT local coordinates
-            nsls2_local = np.concatenate(np.array([0, 0, 0]), np.array(origin))
+            nsls2_local = np.concatenate((np.array([0, 0, 0]),
+                                          np.array(origin)))
             xrt_local = _transform.nsls2_local.to_xrt_local(nsls2_local,
                                                             obj.origin,
                                                             obj.deflection)
@@ -310,7 +312,7 @@ class ID29Source(xrt_source.GeometricSource):
         have been changed or if updated=True.
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='outboard',
+                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection=None,
                  **kwargs):
         super().__init__(*args, center=center, **kwargs)
         self.beamOut = None  # Output in global coordinate!
@@ -575,7 +577,7 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
 
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='outboard',
+                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection=None,
                  upstream=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
@@ -707,7 +709,7 @@ class ID29Screen(xrt_screen.Screen):
 
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
-                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection='outboard',
+                 origin=np.array([0, 0, 0, 0, 0, 0]), deflection=None,
                  upstream=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 

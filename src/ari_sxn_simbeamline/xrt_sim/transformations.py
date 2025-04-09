@@ -372,10 +372,20 @@ class _Nsls2_local:
             A 1x6 numpy array that is the coordinates in XRT local
             coordinates.
         """
+        # take care of 'None' deflection
+        if deflection:
+            rotation_matrix = _xrt_local_to_global[deflection]
+        else:
+            rotation_matrix = _xrt_local_to_global['outboard']
+
         xrt_global = self.to_xrt_global(nsls2_local, origin)
         xrt_origin = _nsls2_global_to_xrt_global(origin)
         xrt_rotated = xrt_global - xrt_origin
-        xrt_local = np.dot(_xrt_local_to_global[deflection], xrt_rotated)
+        xrt_rotated_coords = xrt_rotated[:3]
+        xrt_rotated_angles = xrt_rotated[3:]
+        xrt_local_coords = np.dot(rotation_matrix, xrt_rotated_coords)
+        xrt_local_angles = np.dot(rotation_matrix, xrt_rotated_angles)
+        xrt_local = np.concatenate((xrt_local_coords, xrt_local_angles))
 
         return xrt_local
 
@@ -465,10 +475,20 @@ class _Nsls2_global:
             A 1x6 numpy array that is the coordinates in XRT local
             coordinates.
         """
+        # take care of 'None' deflection
+        if deflection:
+            rotation_matrix = _xrt_local_to_global[deflection]
+        else:
+            rotation_matrix = _xrt_local_to_global['outboard']
+
         xrt_global = self.to_xrt_global(nsls2_global)
         xrt_origin = _nsls2_global_to_xrt_global(origin)
         xrt_rotated = xrt_global - xrt_origin
-        xrt_local = np.dot(_xrt_local_to_global[deflection], xrt_rotated)
+        xrt_rotated_coords = xrt_rotated[:3]
+        xrt_rotated_angles = xrt_rotated[3:]
+        xrt_local_coords = np.dot(rotation_matrix, xrt_rotated_coords)
+        xrt_local_angles = np.dot(rotation_matrix, xrt_rotated_angles)
+        xrt_local = np.concatenate((xrt_local_coords, xrt_local_angles))
 
         return xrt_local
 
@@ -560,9 +580,14 @@ class _Xrt_global:
             A 1x6 numpy array that is the coordinates in XRT local
             coordinates.
         """
+        if deflection:
+            rotation_matrix = _xrt_local_to_global[deflection]
+        else:
+            rotation_matrix = _xrt_local_to_global['outboard']
+
         xrt_origin = _nsls2_global_to_xrt_global(origin)
         xrt_rotated = xrt_global - xrt_origin
-        xrt_local = np.dot(_xrt_local_to_global[deflection], xrt_rotated)
+        xrt_local = np.dot(rotation_matrix, xrt_rotated)
         return xrt_local
 
 
@@ -611,8 +636,13 @@ class _Xrt_local:
             A 1x6 numpy array that is the coordinates in XRT local
             coordinates.
         """
+        if deflection:
+            rotation_matrix = _xrt_local_to_global[deflection]
+        else:
+            rotation_matrix = _xrt_local_to_global['outboard']
+
         xrt_origin = _nsls2_global_to_xrt_global(origin)
-        xrt_rotated = np.dot(_xrt_local_to_global[deflection].T, xrt_local)
+        xrt_rotated = np.dot(rotation_matrix.T, xrt_local)
 
         xrt_global = xrt_rotated + xrt_origin
         return xrt_global
