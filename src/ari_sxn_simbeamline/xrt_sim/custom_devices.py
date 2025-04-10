@@ -213,7 +213,8 @@ def _update_parameters(obj, updated=False):
             xrt_local = _transform.nsls2_local.to_xrt_local(nsls2_local,
                                                             obj.origin,
                                                             obj.deflection)
-            xrt_origin = tuple(xrt_local[:3])
+
+            xrt_origin = tuple(np.deg2rad(xrt_local[:3])) # convert to radians
             # get current xrt model version
             current = tuple([getattr(obj, angle)
                              for angle in ['pitch', 'roll', 'yaw']])
