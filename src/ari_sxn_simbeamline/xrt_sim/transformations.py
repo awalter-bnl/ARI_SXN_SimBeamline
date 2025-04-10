@@ -30,15 +30,15 @@ def _rotation_matrix(angles):
 
     # Rotation matrices around x, y, z axes
     Rx_matrix = np.array([[1, 0, 0],
-                          [0, np.cos(Rx), -np.sin(Rx)],
-                          [0, np.sin(Rx), np.cos(Rx)]])
+                          [0, np.cos(np.deg2rad(Rx)), -np.sin(np.deg2rad(Rx))],
+                          [0, np.sin(np.deg2rad(Rx)), np.cos(np.deg2rad(Rx))]])
 
-    Ry_matrix = np.array([[np.cos(Ry), 0, np.sin(Ry)],
+    Ry_matrix = np.array([[np.cos(np.deg2rad(Ry)), 0, np.sin(np.deg2rad(Ry))],
                           [0, 1, 0],
-                          [-np.sin(Ry), 0, np.cos(Ry)]])
+                          [-np.sin(np.deg2rad(Ry)), 0, np.cos(np.deg2rad(Ry))]])
 
-    Rz_matrix = np.array([[np.cos(Rz), -np.sin(Rz), 0],
-                          [np.sin(Rz), np.cos(Rz), 0],
+    Rz_matrix = np.array([[np.cos(np.deg2rad(Rz)), -np.sin(np.deg2rad(Rz)), 0],
+                          [np.sin(np.deg2rad(Rz)), np.cos(np.deg2rad(Rz)), 0],
                           [0, 0, 1]])
 
     rot_matrix = np.dot(Rz_matrix, np.dot(Ry_matrix, Rx_matrix))
@@ -216,7 +216,7 @@ def _nsls2_global_to_xrt_global(nsls2_global):
     nsls2_angles = np.array(nsls2_global[3:])
 
     # rotation matrix which is swapping the z axis for the y axis
-    rotation_matrix = np.array([[0, -1.0, 0], [0, 0, 1.0], [-1.0, 0, 0]])
+    rotation_matrix = np.array([[-1, 0, 0], [0, 0, 1.0], [0, 1, 0]])
 
     # rotate the NSLS-II coordinates and angles into XRT coordinates and angles
     xrt_coords = np.dot(rotation_matrix, nsls2_coords)
@@ -273,7 +273,7 @@ def _xrt_global_to_nsls2_global(xrt_global):
     xrt_angles = np.array(xrt_global[3:])
 
     # rotation matrix which is swapping the z axis for the y axis
-    rotation_matrix = np.array([[0, -1.0, 0], [0, 0, 1.0], [-1.0, 0, 0]])
+    rotation_matrix = np.array([[-1, 0, 0], [0, 0, 1.0], [0, 1, 0]])
 
     # rotate the NSLS-II coordinates and angles into XRT coordinates and angles
     nsls2_coords = np.dot(rotation_matrix, xrt_coords)

@@ -12,22 +12,37 @@ _transform = Transform()
 
 # Define a function for creating xarrays from beamin/ beamout objects
 def beam_to_xarray(beam_object, bins=(100, 100, 100),
+                   origin=np.array([0, 0, 0, 0, 0, 0]),
                    output_range=((-10, 10), (-10, 10), None)):
     """
     Convert a beam object to an xarray object.
 
-    This function takes a beam object and converts it to an xarray object
-    with the beam properties as data variables. The xarray object is then
-    returned.
+    This function takes a beam object attribute from 'object' and converts it to
+    an xarray object with the beam properties as data variables. The xarray
+    object is then returned. As this requires converting the beam object to
+    NSLS-II coordinates the object must have 'origin'
+    attributes as well as the xrt.backends.raycing.sources_beams.Beam attribute
+    given by 'beam_object'.
+
+    In this method 'origin' is the origin of the object used to generate
+    beam_object in NSLSII global coordinates in the form:
+
+     $(x_{g}, y_{g}, z_{g}, Rx_{g}, Ry_{g}, Rz_{g})$
+
+     where: $x_{g}, y_{g}, z_{g}$ are the coordinates of the centre of the
+        nominal position of the object in global NSLSII coordinates and
+        $Rx_{g}, Ry_{g}, Rz_{g}$ are the angles around each axis defining
+        incoming beam direction in global NSLSII coordinates.
 
     Parameters
     ----------
-    beam_object : a beam object
-        The beam object to be converted to an xarray object.
-
+    beam_object : xrt.backends.raycing.sources_beams.Beam
+        The beam object to be converted to an xarray.
     bins : a list of integers, i.e., [100, 100, 100] (by default)
         The number of points along each direction for the histogram.
-
+    origin : np.array
+        A 1x6 array that is the origin of the component in NSLS-II global
+        co-ordinates as described in the doc-string.
     output_range : a list of tuples, i.e., [(-1, 1), (-1, 1), (850, 850), None]
         The range of the histogram along each direction. If None, the range
         is automatically determined.
@@ -38,23 +53,41 @@ def beam_to_xarray(beam_object, bins=(100, 100, 100),
         The xarray object with the beam properties as data variables.
     """
 
-    # extract the required values
-    points = np.vstack([beam_object.__dict__['x'],
-                        beam_object.__dict__['z'],
+    # extract out the x,z locations and convert from xrt global to NSLS-II
+    # local coords
+    shape = beam_object.__dict__['x'].shape
+    xrt_global_coords = np.stack(
+        (beam_object.__dict__['x'],
+         beam_object.__dict__['y'],
+         beam_object.__dict__['z'],
+         np.zeros(shape), np.zeros(shape), np.zeros(shape)),
+        axis=-1)
+
+    for i, xrt_global in enumerate(xrt_global_coords):
+        if i == 0:
+            nsls2_local_coords = np.array([_transform.xrt_global.to_nsls2_local(
+                xrt_global, origin=origin),])
+        else:
+            nsls2_local_coords = np.append(
+                nsls2_local_coords,
+                np.array([_transform.xrt_global.to_nsls2_local(
+                    xrt_global, origin=origin),]), axis=0)
+
+    points = np.vstack([nsls2_local_coords[:, 0], nsls2_local_coords[:, 1],
                         beam_object.__dict__['E']]).T
 
     data, edges = np.histogramdd(points, bins=bins, range=output_range)
 
     # convert the edges to the correct lists
     x_coords = list(edges[0][:-1])
-    z_coords = list(edges[1][:-1])
+    y_coords = list(edges[1][:-1])
     E_coords = list(edges[2][:-1])
 
     # create the xarray object
     beam_array = xr.DataArray(data,
-                              coords={'x': x_coords, 'z': z_coords,
+                              coords={'x': x_coords, 'y': y_coords,
                                       'E': E_coords},
-                              dims=['x', 'z', 'E'])
+                              dims=['x', 'y', 'E'])
 
     return beam_array
 

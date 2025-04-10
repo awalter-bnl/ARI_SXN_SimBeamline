@@ -98,9 +98,9 @@ class AriModel:
                         nrays=10000,
                         distx='normal', dx=0.30,  # source linear profile
                         disty=None, dy=0,
-                        distz='normal', dz=0.001,
-                        distxprime='normal', dxprime=0.1,  # angular profile
-                        distzprime='normal', dzprime=0.1,
+                        distz='normal', dz=0.30,
+                        distxprime='normal', dxprime=0.3,  # angular profile
+                        distzprime='normal', dzprime=0.3,
                         # source energy profile below
                         distE='normal',
                         energies=(energy_value, energy_bandwidth),
