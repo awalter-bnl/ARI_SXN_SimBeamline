@@ -94,7 +94,7 @@ class AriModel:
     # TODO: Consider a toroidal (donut) source profile.
     source = ID29Source(bl=bl,
                         name='source',
-                        center=(0, 0, 0),  # location (global XRT coords)
+                        center=(0., 0., 0.),  # location (global XRT coords)
                         nrays=10000,
                         distx='normal', dx=0.30,  # source linear profile
                         disty=None, dy=0,
