@@ -1,14 +1,14 @@
 import numpy as np
 
-# Transformation of coordinates between XRT and NSLS-II.
-_xrt_local_to_global = {'inboard': np.array([[0, -1.0, 0], [0, 0, 1.0],
-                                             [-1.0, 0, 0]]),
-                        'outboard': np.array([[0, 1.0, 0], [0, 0, 1.0],
-                                              [1.0, 0, 0]]),
-                        'downward': np.array([[1.0, 0, 0], [0, 0, 1.0],
-                                              [0, -1.0, 0]]),
-                        'upward': np.array([[-1.0, 0, 0], [0, 0, 1.0],
-                                            [0, 1.0, 0]])}
+# Transformation of coordinates between XRT local and XRT global.
+_xrt_local_to_global = {'inboard': np.array([[1.0, 0, 0], [0, 1.0, 0],
+                                             [0, 0, 1.0]]),
+                        'outboard': np.array([[-1.0, 0, 0], [0, 1.0, 0],
+                                              [0, 0, -1.0]]),
+                        'downward': np.array([[0, 0, 1.0], [0, 1.0, 0],
+                                              [-1.0, 0, 0]]),
+                        'upward': np.array([[0, 0, -1.0], [0, 1.0, 0],
+                                            [1.0, 0, 0]])}
 
 
 def _rotation_matrix(angles):
@@ -376,7 +376,9 @@ class _Nsls2_local:
         if deflection:
             rotation_matrix = _xrt_local_to_global[deflection]
         else:
-            rotation_matrix = _xrt_local_to_global['outboard']
+            rotation_matrix = _xrt_local_to_global['inboard']
+
+        print (f'rotation_matrix: {rotation_matrix}')
 
         xrt_global = self.to_xrt_global(nsls2_local, origin)
         xrt_origin = _nsls2_global_to_xrt_global(origin)
@@ -479,7 +481,7 @@ class _Nsls2_global:
         if deflection:
             rotation_matrix = _xrt_local_to_global[deflection]
         else:
-            rotation_matrix = _xrt_local_to_global['outboard']
+            rotation_matrix = _xrt_local_to_global['inboard']
 
         xrt_global = self.to_xrt_global(nsls2_global)
         xrt_origin = _nsls2_global_to_xrt_global(origin)
@@ -583,7 +585,7 @@ class _Xrt_global:
         if deflection:
             rotation_matrix = _xrt_local_to_global[deflection]
         else:
-            rotation_matrix = _xrt_local_to_global['outboard']
+            rotation_matrix = _xrt_local_to_global['inboard']
 
         xrt_origin = _nsls2_global_to_xrt_global(origin)
         xrt_rotated = xrt_global - xrt_origin

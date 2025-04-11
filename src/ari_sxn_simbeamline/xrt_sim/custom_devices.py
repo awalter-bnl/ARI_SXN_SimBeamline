@@ -208,19 +208,26 @@ def _update_parameters(obj, updated=False):
                 setattr(obj, 'center', xrt_origin)
         elif parameter == 'angles':
             # convert to XRT local coordinates
-            nsls2_local = np.concatenate((np.array([0, 0, 0]),
-                                          np.array(origin)))
+            print (f'origin: {origin}')
+            nsls2_local = np.concatenate((np.array(origin),
+                                          np.array([0, 0, 0])))
+            print (f'nsls2_local: {nsls2_local}')
             xrt_local = _transform.nsls2_local.to_xrt_local(nsls2_local,
                                                             obj.origin,
                                                             obj.deflection)
-
-            xrt_origin = tuple(np.deg2rad(xrt_local[:3])) # convert to radians
+            print (f'xrt_local: {xrt_local}')
+            xrt_origin = tuple(xrt_local[:3])
+            print (f'xrt_origin: {xrt_origin}')
             # get current xrt model version
             current = tuple([getattr(obj, angle)
-                             for angle in ['pitch', 'roll', 'yaw']])
+                             for angle in ['yaw', 'roll', 'pitch']])
+            print (f'current: {current}, xrt_origin: {xrt_origin}')
+
             if xrt_origin != current:
+                print (f'Updating angles: {xrt_origin}')
                 updated = True
-                for i, angle in enumerate(['pitch', 'roll', 'yaw']):
+                for i, angle in enumerate(['yaw', 'roll', 'pitch']):
+                    print
                     setattr(obj, angle, xrt_origin[i])
         else:
             if getattr(obj, parameter) != origin:
