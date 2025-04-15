@@ -99,8 +99,8 @@ class AriModel:
                         distx='normal', dx=0.30,  # source linear profile
                         disty=None, dy=0,
                         distz='normal', dz=0.30,
-                        distxprime='normal', dxprime=0.03,  # angular profile
-                        distzprime='normal', dzprime=0.03,
+                        distxprime='normal', dxprime=0.00003,  # angular profile
+                        distzprime='normal', dzprime=0.00003,
                         # source energy profile below
                         distE='normal',
                         energies=(energy_value, energy_bandwidth),
@@ -117,7 +117,7 @@ class AriModel:
     m1 = ID29OE(bl=bl,
                 name='m1',
                 center=(0, 27850, 0),  # location (global XRT coords)
-                yaw=0, roll=0, pitch=np.radians(2),
+                yaw=0, roll=+np.pi/2, pitch=np.radians(2),
                 material=gold,
                 limPhysX=[-60/2+10, 60/2+10], limOptX=[-15/2, 15/2],
                 limPhysY=[-400/2, 400/2], limOptY=[-240/2, 240/2],
