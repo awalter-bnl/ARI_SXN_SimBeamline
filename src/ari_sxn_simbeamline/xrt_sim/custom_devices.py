@@ -201,6 +201,14 @@ def _update_parameters(obj, updated=False):
 
     """
     print (f'object: {obj}')
+
+    # A dictionary that provides the conversion from xt local Rx, Yr, Rz
+    # to yaw, pitch, roll.
+    conversion = {'upward': np.array([0, 0, 0]),
+                  'downward': np.array([0, 180, 0]),
+                  'inboard': np.array([0, 90, 0]),
+                  'outboard': np.array([0, -90, 0])}
+
     for parameter, origin in obj._parameter_map.items():
         if parameter == 'center':
             # convert to XRT global coordinates
@@ -221,14 +229,18 @@ def _update_parameters(obj, updated=False):
             xrt_local = _transform.nsls2_local.to_xrt_local(nsls2_local,
                                                             obj.origin,
                                                             obj.deflection)
-            xrt_origin = tuple(xrt_local[:3])
+            # convert from xrt local to 'pitch', 'roll', 'yaw'
+            xrt_local = xrt_local[:3] + conversion[obj.deflection]
+            # convert to radians from degrees
+            xrt_origin = tuple(np.deg2rad(xrt_local))
+
             # get current xrt model version
             current = tuple([getattr(obj, angle)
-                             for angle in ['yaw', 'roll', 'pitch']])
+                             for angle in ['pitch', 'roll', 'yaw']])
 
             if xrt_origin != current:
                 updated = True
-                for i, angle in enumerate(['yaw', 'roll', 'pitch']):
+                for i, angle in enumerate(['pitch', 'roll', 'yaw']):
                     setattr(obj, angle, xrt_origin[i])
         else:
             if getattr(obj, parameter) != origin:
@@ -360,7 +372,10 @@ class ID29Source(xrt_source.GeometricSource):
         self.beamOut = None  # Output in global coordinate!
         self._default_parameter_map = parameter_map
         self.origin = origin
-        self.deflection = deflection
+        if deflection:
+            self.deflection = deflection
+        else:
+            self.deflection = 'upward'
 
     @property
     def _parameter_map(self):
@@ -502,7 +517,10 @@ class ID29OE(xrt_oes.OE):
         self.origin = origin
         self._default_parameter_map = parameter_map
         self._upstream = upstream  # Object from modified XRT
-        self.deflection = deflection
+        if deflection:
+            self.deflection = deflection
+        else:
+            self.deflection = 'upward'
 
     @property
     def _parameter_map(self):
@@ -638,7 +656,10 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
         self.origin = origin
         self._default_parameter_map = parameter_map
         self._upstream = upstream  # Object from modified XRT
-        self.deflection = deflection
+        if deflection:
+            self.deflection = deflection
+        else:
+            self.deflection = 'upward'
 
     @property
     def _parameter_map(self):
@@ -774,7 +795,10 @@ class ID29Screen(xrt_screen.Screen):
         self.origin = origin
         self._default_parameter_map = parameter_map
         self._upstream = upstream  # Object from modified XRT
-        self.deflection = deflection
+        if deflection:
+            self.deflection = deflection
+        else:
+            self.deflection = 'upward'
 
     @property
     def _parameter_map(self):

@@ -9,7 +9,7 @@ import xrt.backends.raycing.materials as xrt_material
 matplotlib.use('qtagg')
 
 # Define a test object to use in place of the caproto IOC for testing
-mirror1 = TestM1({'Ry_coarse': np.radians(2), 'Ry_fine': 0, 'Rz': 0,
+mirror1 = TestM1({'Ry_coarse': 2, 'Ry_fine': 0, 'Rz': 0,
                   'x': 0, 'y': 0})
 
 
