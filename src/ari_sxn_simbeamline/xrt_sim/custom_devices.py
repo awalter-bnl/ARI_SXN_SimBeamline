@@ -171,11 +171,10 @@ class TestM1(TestMirror):
         return calculated_Ry
 
     @Ry.setter
-    def Ry(self, set_point): # function used to take input from command line
+    def Ry(self, set_point):  # function used to take input from command line
 
         raise ValueError('Ry is read only and can only be reset through '
                          'Ry_coarse and Ry_fine!')
-
 
 
 def _update_parameters(obj, updated=False):
@@ -200,7 +199,7 @@ def _update_parameters(obj, updated=False):
         indicates a re-activation required.
 
     """
-    print (f'object: {obj}')
+    print(f'object: {obj}')
 
     # A dictionary that provides the conversion from xt local Rx, Yr, Rz
     # to yaw, pitch, roll.
@@ -385,7 +384,7 @@ class ID29Source(xrt_source.GeometricSource):
         return _parse_parameter_map(self._default_parameter_map)
 
     @_parameter_map.setter
-    def _parameter_map(self, new_parameter_map): # used to take input manually
+    def _parameter_map(self, new_parameter_map):  # used to take input manually
 
         raise ValueError('The _parameter_map can not be reset!')
 
@@ -430,7 +429,7 @@ class ID29OE(xrt_oes.OE):
 
     Parameters
     ----------
-    upstream : arguments, such as m1, pgm ...
+    upstream_optic : arguments, such as m1, pgm ...
         The argument takes the beamline component that has Beam Object.
     parameter_map : dict
         A dictionary mapping xrt parameters to python objects that return the
@@ -508,7 +507,7 @@ class ID29OE(xrt_oes.OE):
 
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
                  origin=np.array([0, 0, 0, 0, 0, 0]),
-                 upstream=None, deflection='outboard', **kwargs):
+                 upstream_optic=None, deflection='outboard', **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
         self.beamIn = None  # Input in global coordinate!
@@ -516,7 +515,7 @@ class ID29OE(xrt_oes.OE):
         self.beamOutloc = None  # Output in local coordinate!
         self.origin = origin
         self._default_parameter_map = parameter_map
-        self._upstream = upstream  # Object from modified XRT
+        self._upstream = upstream_optic  # Object from modified XRT
         if deflection:
             self.deflection = deflection
         else:
@@ -530,7 +529,7 @@ class ID29OE(xrt_oes.OE):
         return _parse_parameter_map(self._default_parameter_map)
 
     @_parameter_map.setter
-    def _parameter_map(self, new_parameter_map): # used to take input manually
+    def _parameter_map(self, new_parameter_map):  # used to take input manually
 
         raise ValueError('The _parameter_map can not be reset!')
 
@@ -572,7 +571,7 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
 
     Parameters
     ----------
-    upstream : arguments, such as m1, pgm ...
+    upstream_optic : arguments, such as m1, pgm ...
         The argument takes the beamline component that has Beam Object.
     parameter_map : dict
         A dictionary mapping xrt parameters to python objects that return the
@@ -648,14 +647,14 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
                  origin=np.array([0, 0, 0, 0, 0, 0]), deflection=None,
-                 upstream=None, **kwargs):
+                 upstream_optic=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
         self.beamIn = None  # Input in global coordinate!
         self.beamOut = None  # Output in global coordinate!
         self.origin = origin
         self._default_parameter_map = parameter_map
-        self._upstream = upstream  # Object from modified XRT
+        self._upstream = upstream_optic  # Object from modified XRT
         if deflection:
             self.deflection = deflection
         else:
@@ -669,7 +668,7 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
         return _parse_parameter_map(self._default_parameter_map)
 
     @_parameter_map.setter
-    def _parameter_map(self, new_parameter_map): # used to take input manually
+    def _parameter_map(self, new_parameter_map):  # used to take input manually
         raise ValueError('The _parameter_map can not be reset!')
 
     def activate(self, updated=False):
@@ -713,7 +712,7 @@ class ID29Screen(xrt_screen.Screen):
 
     Parameters
     ----------
-    upstream : arguments, such as m1, pgm ...
+    upstream_optic : arguments, such as m1, pgm ...
         The argument takes the beamline component that has Beam Object.
     parameter_map : dict
         A dictionary mapping xrt parameters to python objects that return the
@@ -787,14 +786,14 @@ class ID29Screen(xrt_screen.Screen):
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
                  origin=np.array([0, 0, 0, 0, 0, 0]), deflection=None,
-                 upstream=None, **kwargs):
+                 upstream_optic=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
 
         self.beamIn = None  # Input in global coordinate!
         self.beamOut = None  # Output in global coordinate!
         self.origin = origin
         self._default_parameter_map = parameter_map
-        self._upstream = upstream  # Object from modified XRT
+        self._upstream = upstream_optic  # Object from modified XRT
         if deflection:
             self.deflection = deflection
         else:
@@ -808,7 +807,7 @@ class ID29Screen(xrt_screen.Screen):
         return _parse_parameter_map(self._default_parameter_map)
 
     @_parameter_map.setter
-    def _parameter_map(self, new_parameter_map): # used to take input manually
+    def _parameter_map(self, new_parameter_map):  # used to take input manually
         raise ValueError('The _parameter_map can not be reset!')
 
     def activate(self, updated=False):

@@ -121,7 +121,7 @@ class AriModel:
                 material=gold,
                 limPhysX=[-60/2+10, 60/2+10], limOptX=[-15/2, 15/2],
                 limPhysY=[-400/2, 400/2], limOptY=[-240/2, 240/2],
-                shape='rect', upstream=source,
+                shape='rect', upstream_optic=source,
                 parameter_map={'center': {'x': (mirror1, 'x'),
                                           'y': (mirror1, 'y'),
                                           'z': 0},
@@ -139,7 +139,7 @@ class AriModel:
                               kind=['left', 'right', 'bottom', 'top'],
                               opening=[-20 / 2, 20 / 2,
                                        -20 / 2, 20 / 2],
-                              upstream=m1,
+                              upstream_optic=m1,
                               parameter_map={
                                   'opening': {'left': (mirror1.baffles,
                                                        'outboard'),
@@ -158,7 +158,7 @@ class AriModel:
                          center=(331.3, 32587.8, 0),  # location (global XRT coords)
                          x=np.array([1, 0, 0]),
                          z=np.array([0, 0, 1]),
-                         upstream=m1_baffles,
+                         upstream_optic=m1,
                          parameter_map={},
                          origin=ari_model_origins['m1_diag'],
                          deflection='None')
@@ -170,7 +170,7 @@ class AriModel:
                                 x='auto', z='auto',
                                 kind=['left', 'right', 'bottom', 'top'],
                                 opening=[-50, 50, -50, 50],
-                                upstream=m1_baffles,
+                                upstream_optic=m1,
                                 parameter_map={
                                     'opening': {'left': -50, 'right': 50,
                                                 'bottom': -50,
