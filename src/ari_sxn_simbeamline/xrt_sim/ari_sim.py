@@ -134,7 +134,7 @@ class AriModel:
     # Add the M1 Baffle slit to beamline object bl
     m1_baffles = ID29Aperture(bl=bl,
                               name='m1_baffles',
-                              center=(314.13, 32342.3, 0),  # location (XRT coords)
+                              center=(-314.13, 32342.3, 0),  # location (XRT coords)
                               x='auto', z='auto',
                               kind=['left', 'right', 'bottom', 'top'],
                               opening=[-20 / 2, 20 / 2,
@@ -155,7 +155,7 @@ class AriModel:
     # and potentially energy filter based on if a multilayer is inserted.
     m1_diag = ID29Screen(bl=bl,
                          name='m1_diag',
-                         center=(331.3, 32587.8, 0),  # location (global XRT coords)
+                         center=(-331.3, 32587.8, 0),  # location (global XRT coords)
                          x=np.array([1, 0, 0]),
                          z=np.array([0, 0, 1]),
                          upstream_optic=m1,
@@ -166,7 +166,7 @@ class AriModel:
     # Add slit at M1 diagnostic to block beam when diagnostic unit is in
     m1_diag_slit = ID29Aperture(bl=bl,
                                 name='m1_diag_slit',
-                                center=(331.3, 32587.8, 0),  # 0.1mm offset to diag
+                                center=(-331.3, 32587.8, 0),  # 0.1mm offset to diag
                                 x='auto', z='auto',
                                 kind=['left', 'right', 'bottom', 'top'],
                                 opening=[-50, 50, -50, 50],
