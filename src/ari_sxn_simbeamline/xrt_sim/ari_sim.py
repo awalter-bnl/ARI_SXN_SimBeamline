@@ -34,9 +34,9 @@ genericGR = xrt_material.Material('Ni', rho=8.908,
 # incoming beam.
 ari_model_origins = {'source': np.array([0, 0, 0, 0, 0, 0]),
                      'm1': np.array([0, 0, 27850, 0, 0, 0]),
-                     'm1_baffles': np.array([314.13, 0, 32342.3, 0, 4, 0]),
-                     'm1_diag': np.array([331.3, 0, 32587.8, 0, 4, 0]),
-                     'm1_diag_slit': np.array([331.3, 0, 32587.8, 0, 4, 0])}
+                     'm1_baffles': np.array([-314.13, 0, 32342.3, 0, 4, 0]),
+                     'm1_diag': np.array([-331.3, 0, 32587.8, 0, 4, 0]),
+                     'm1_diag_slit': np.array([-331.3, 0, 32587.8, 0, 4, 0])}
 
 
 # noinspection PyUnresolvedReference
