@@ -56,12 +56,34 @@ def beam_to_xarray(beam_object, bins=(100, 100, 100),
     # extract out the x,z locations and convert from xrt global to NSLS-II
     # local coords
     shape = beam_object.__dict__['x'].shape
+
+    # get the xrt global coordinates
+    print ('Beam object:')
+    for axis in ['x', 'y', 'z']:
+        print(f'    {axis} range: {beam_object.__dict__[axis].min()} to '
+              f'{beam_object.__dict__[axis].max()}')
+
+    print(f'{origin=}')
+
     xrt_global_coords = np.stack(
         (beam_object.__dict__['x'],
-         beam_object.__dict__['y'],
+         beam_object.__dict__['y']+origin[2],  # beam not quite in xrt global.
          beam_object.__dict__['z'],
-         np.zeros(shape), np.zeros(shape), np.zeros(shape)),
+         np.ones(shape)*-origin[3],
+         np.ones(shape)*origin[5],
+         np.zeros(shape)*origin[4]),
         axis=-1)
+
+    print(f'XRT global coordinates:')
+    print(f'    x range: {xrt_global_coords[:, 0].min()} to '
+          f'{xrt_global_coords[:, 0].max()}')
+    print(f'    y range: {xrt_global_coords[:, 1].min()} to '
+          f'{xrt_global_coords[:, 1].max()}')
+    print(f'    z range: {xrt_global_coords[:, 2].min()} to '
+          f'{xrt_global_coords[:, 2].max()}')
+    print(f'    Rz range: {xrt_global_coords[:, 5].min()} to '
+          f'{xrt_global_coords[:, 5].max()}')
+
 
     for i, xrt_global in enumerate(xrt_global_coords):
         if i == 0:
@@ -73,6 +95,14 @@ def beam_to_xarray(beam_object, bins=(100, 100, 100),
                 np.array([_transform.xrt_global.to_nsls2_local(
                     xrt_global, origin=origin),]), axis=0)
 
+    print(f'NSLS-II local coordinates:')
+    print(f'    x range: {nsls2_local_coords[:, 0].min()} to '
+          f'{nsls2_local_coords[:, 0].max()}')
+    print(f'    y range: {nsls2_local_coords[:, 1].min()} to '
+          f'{nsls2_local_coords[:, 1].max()}')
+    print(f'    Ry range: {nsls2_local_coords[:, 4].min()} to '
+          f'{nsls2_local_coords[:, 4].max()}')
+
     points = np.vstack([nsls2_local_coords[:, 0], nsls2_local_coords[:, 1],
                         beam_object.__dict__['E']]).T
 
@@ -82,7 +112,9 @@ def beam_to_xarray(beam_object, bins=(100, 100, 100),
     x_coords = list(edges[0][:-1])
     y_coords = list(edges[1][:-1])
     E_coords = list(edges[2][:-1])
-
+    print(f'xarray ranges')
+    print(f'    x range: {min(x_coords)} to {max(x_coords)}')
+    print(f'    y range: {min(y_coords)} to {max(y_coords)}')
     # create the xarray object
     beam_array = xr.DataArray(data,
                               coords={'x': x_coords, 'y': y_coords,
@@ -199,7 +231,6 @@ def _update_parameters(obj, updated=False):
         indicates a re-activation required.
 
     """
-    print(f'object: {obj}')
 
     # A dictionary that provides the conversion from xt local Rx, Yr, Rz
     # to yaw, pitch, roll.
