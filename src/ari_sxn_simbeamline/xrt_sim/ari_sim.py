@@ -4,6 +4,8 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 import xrt.backends.raycing as xrt_raycing
+import xrt.backends.raycing.run as xrt_run
+import xrt.runner as xrt_runner
 import xrt.backends.raycing.materials as xrt_material
 
 matplotlib.use('qtagg')
@@ -33,10 +35,14 @@ genericGR = xrt_material.Material('Ni', rho=8.908,
 # rotation around the x, y, z axes respectively that define the direction of the
 # incoming beam.
 ari_model_origins = {'source': np.array([0, 0, 0, 0, 0, 0]),
+                     'm1_upstream': np.array([0, 0, 27849, 0, 0, 0]),
                      'm1': np.array([0, 0, 27850, 0, 0, 0]),
-                     'm1_baffles': np.array([-314.13, 0, 32342.3, 0, 4, 0]),
-                     'm1_diag': np.array([-331.3, 0, 32587.8, 0, 4, 0]),
-                     'm1_diag_slit': np.array([-331.3, 0, 32587.8, 0, 4, 0])}
+                     'm1_dnstream': np.array([0, 0, 27851, 0, 0, 0]),
+                     #'m1_baffles': np.array([314.13, 0, 32342.3, 0, 4, 0]),
+                     'm1_diag': np.array([0, 0, 32587.8, 0, 4, 0]),
+                     #'m1_diag': np.array([331.3, 0, 32587.8, 0, 4, 0]),
+                     #'m1_diag_slit': np.array([331.3, 0, 32587.8, 0, 4, 0])
+                     }
 
 
 # noinspection PyUnresolvedReference
@@ -59,8 +65,7 @@ class AriModel:
 
     def __init__(self):
         # An ordered list of beamline components
-        self.components = ['source', 'm1', 'm1_baffles', 'm1_diag',
-                           'm1_diag_slit']
+        self.components = ari_model_origins.keys()
         self.activate(updated=True)  # Initialize the beamline components
 
     def activate(self, updated=False):
@@ -80,8 +85,20 @@ class AriModel:
             some of the parameters have been changed.
         """
 
+        # Loop through the components and activate them
         for item in self.components:
             updated = getattr(self, item).activate(updated=updated)
+
+        def _run_process(bl):
+            """
+            Run process function passed to xrt_run object.
+            """
+            beams={}
+            for item in self.components:
+                beams[item] = getattr(self, item).beamOut
+
+        xrt_run.run_process = _run_process
+        xrt_runner.run_ray_tracing(beamLine=self.bl)
 
         return updated
 
@@ -112,6 +129,17 @@ class AriModel:
                                                   'yaw': 0}},
                         origin=ari_model_origins['source'])
 
+    # Add one screen upstream of the M1 mirror for debugging
+    m1_upstream = ID29Screen(bl=bl,
+                             name='m1_diag',
+                             center=(0, 27849, 0),  # location (global XRT coords)
+                             x=np.array([1, 0, 0]),
+                             z=np.array([0, 0, 1]),
+                             upstream_optic=source,
+                             parameter_map={},
+                             origin=ari_model_origins['m1_upstream'],
+                             deflection='None')
+
     # Add the M1 to beamline object bl
     # TODO: This should be an elliptical mirror that focuses the beam.
     m1 = ID29OE(bl=bl,
@@ -119,7 +147,7 @@ class AriModel:
                 center=(0, 27850, 0),  # location (global XRT coords)
                 yaw=0, roll=+np.pi/2, pitch=np.radians(2),
                 material=gold,
-                limPhysX=[-60/2+10, 60/2+10], limOptX=[-15/2, 15/2],
+                limPhysX=[-60/2-10, 60/2+10], limOptX=[-15/2, 15/2],
                 limPhysY=[-400/2, 400/2], limOptY=[-240/2, 240/2],
                 shape='rect', upstream_optic=source,
                 parameter_map={'center': {'x': (mirror1, 'x'),
@@ -131,31 +159,44 @@ class AriModel:
                 origin=ari_model_origins['m1'],
                 deflection='inboard')
 
+    # Add one screen upstream of the M1 mirror for debugging
+    m1_dnstream = ID29Screen(bl=bl,
+                             name='m1_diag',
+                             center=(0, 27851, 0),  # location (global XRT coords)
+                             x=np.array([1, 0, 0]),
+                             z=np.array([0, 0, 1]),
+                             upstream_optic=m1,
+                             parameter_map={},
+                             origin=ari_model_origins['m1_dnstream'],
+                             deflection='None')
+
+
     # Add the M1 Baffle slit to beamline object bl
-    m1_baffles = ID29Aperture(bl=bl,
-                              name='m1_baffles',
-                              center=(-314.13, 32342.3, 0),  # location (XRT coords)
-                              x='auto', z='auto',
-                              kind=['left', 'right', 'bottom', 'top'],
-                              opening=[-20 / 2, 20 / 2,
-                                       -20 / 2, 20 / 2],
-                              upstream_optic=m1,
-                              parameter_map={
-                                  'opening': {'left': (mirror1.baffles,
-                                                       'outboard'),
-                                              'right': (mirror1.baffles,
-                                                        'inboard'),
-                                              'bottom': (mirror1.baffles,
-                                                         'bottom'),
-                                              'top': (mirror1.baffles, 'top')}},
-                              origin=ari_model_origins['m1_baffles'])
+    #m1_baffles = ID29Aperture(bl=bl,
+    #                          name='m1_baffles',
+    #                          center=(314.13, 32342.3, 0),  # location (XRT coords)
+    #                          x='auto', z='auto',
+    #                          kind=['left', 'right', 'bottom', 'top'],
+    #                          opening=[-50, 50,
+    #                                   -50, 50],
+    #                          upstream_optic=m1,
+    #                          parameter_map={
+    #                              'opening': {'left': (mirror1.baffles,
+    #                                                   'left'),
+    #                                          'right': (mirror1.baffles,
+    #                                                    'right'),
+    #                                          'bottom': (mirror1.baffles,
+    #                                                     'bottom'),
+    #                                          'top': (mirror1.baffles, 'top')}},
+    #                          origin=ari_model_origins['m1_baffles'])
 
     # Add one screen at M1 diagnostic to monitor the beam
     # NOTE: the IOC needs to select the right region based on diag position
     # and potentially energy filter based on if a multilayer is inserted.
     m1_diag = ID29Screen(bl=bl,
                          name='m1_diag',
-                         center=(-331.3, 32587.8, 0),  # location (global XRT coords)
+                         center=(0, 32587.8, 0),  # location (global XRT coords)
+                         #center=(331.3, 32587.8, 0),  # location (global XRT coords)
                          x=np.array([1, 0, 0]),
                          z=np.array([0, 0, 1]),
                          upstream_optic=m1,
@@ -164,16 +205,16 @@ class AriModel:
                          deflection='None')
 
     # Add slit at M1 diagnostic to block beam when diagnostic unit is in
-    m1_diag_slit = ID29Aperture(bl=bl,
-                                name='m1_diag_slit',
-                                center=(-331.3, 32587.8, 0),  # 0.1mm offset to diag
-                                x='auto', z='auto',
-                                kind=['left', 'right', 'bottom', 'top'],
-                                opening=[-50, 50, -50, 50],
-                                upstream_optic=m1,
-                                parameter_map={
-                                    'opening': {'left': -50, 'right': 50,
-                                                'bottom': -50,
-                                                'top': (mirror1.diagnostic,
-                                                        'multi_trans')}},
-                                origin=ari_model_origins['m1_diag_slit'])
+    #m1_diag_slit = ID29Aperture(bl=bl,
+    #                            name='m1_diag_slit',
+    #                            center=(331.3, 32587.8, 0),  # 0.1mm offset to diag
+    #                            x='auto', z='auto',
+    #                            kind=['left', 'right', 'bottom', 'top'],
+    #                            opening=[-50, 50, -50, 50],
+    #                            upstream_optic=m1,
+    #                            parameter_map={
+    #                                'opening': {'left': -50, 'right': 50,
+    #                                            'bottom': -50,
+    #                                            'top': (mirror1.diagnostic,
+    #                                                    'multi_trans')}},
+    #                            origin=ari_model_origins['m1_diag_slit'])

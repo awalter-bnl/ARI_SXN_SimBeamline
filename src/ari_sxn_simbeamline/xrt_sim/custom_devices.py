@@ -122,8 +122,8 @@ class Test4Slit(TestBase):
     """
 
     def __init__(self):
-        super().__init__({'top': 20, 'bottom': -20,
-                          'inboard': -20, 'outboard': 20})
+        super().__init__({'left': -50, 'right': 50,
+                          'bottom': -50, 'top': 50})
 
         self.currents = [random.uniform(0.0, 1E-6),
                          random.uniform(0.0, 1E-6),
@@ -204,7 +204,7 @@ def _update_parameters(obj, updated=False):
 
     """
 
-    # A dictionary that provides the conversion from xt local Rx, Yr, Rz
+    # A dictionary that provides the conversion from xt local Rx, Ry, Rz
     # to yaw, pitch, roll.
     conversion = {'upward': np.array([0, 0, 0]),
                   'downward': np.array([0, 180, 0]),
