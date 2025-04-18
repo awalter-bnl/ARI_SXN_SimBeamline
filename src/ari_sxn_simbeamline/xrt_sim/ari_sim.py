@@ -4,8 +4,6 @@ import matplotlib
 from matplotlib import pyplot as plt
 import numpy as np
 import xrt.backends.raycing as xrt_raycing
-import xrt.backends.raycing.run as xrt_run
-import xrt.runner as xrt_runner
 import xrt.backends.raycing.materials as xrt_material
 
 matplotlib.use('qtagg')
@@ -38,10 +36,10 @@ ari_model_origins = {'source': np.array([0, 0, 0, 0, 0, 0]),
                      'm1_upstream': np.array([0, 0, 27849, 0, 0, 0]),
                      'm1': np.array([0, 0, 27850, 0, 0, 0]),
                      'm1_dnstream': np.array([0, 0, 27851, 0, 0, 0]),
-                     #'m1_baffles': np.array([314.13, 0, 32342.3, 0, 4, 0]),
+                     # 'm1_baffles': np.array([314.13, 0, 32342.3, 0, 4, 0]),
                      'm1_diag': np.array([0, 0, 32587.8, 0, 4, 0]),
-                     #'m1_diag': np.array([331.3, 0, 32587.8, 0, 4, 0]),
-                     #'m1_diag_slit': np.array([331.3, 0, 32587.8, 0, 4, 0])
+                     # 'm1_diag': np.array([331.3, 0, 32587.8, 0, 4, 0]),
+                     # 'm1_diag_slit': np.array([331.3, 0, 32587.8, 0, 4, 0])
                      }
 
 
@@ -88,17 +86,6 @@ class AriModel:
         # Loop through the components and activate them
         for item in self.components:
             updated = getattr(self, item).activate(updated=updated)
-
-        def _run_process(bl):
-            """
-            Run process function passed to xrt_run object.
-            """
-            beams={}
-            for item in self.components:
-                beams[item] = getattr(self, item).beamOut
-
-        xrt_run.run_process = _run_process
-        xrt_runner.run_ray_tracing(beamLine=self.bl)
 
         return updated
 
