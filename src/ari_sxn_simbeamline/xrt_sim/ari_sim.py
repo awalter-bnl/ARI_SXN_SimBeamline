@@ -9,7 +9,7 @@ import xrt.backends.raycing.materials as xrt_material
 matplotlib.use('qtagg')
 
 # Define a test object to use in place of the caproto IOC for testing
-mirror1 = TestM1({'Ry_coarse': 2, 'Ry_fine': 0, 'Rz': 0,
+mirror1 = TestM1({'Ry_coarse': -2, 'Ry_fine': 0, 'Rz': 0,
                   'x': 0, 'y': 0})
 
 
@@ -37,7 +37,7 @@ ari_model_origins = {'source': np.array([0, 0, 0, 0, 0, 0]),
                      'm1': np.array([0, 0, 27850, 0, 0, 0]),
                      'm1_dnstream': np.array([0, 0, 27851, 0, 0, 0]),
                      # 'm1_baffles': np.array([314.13, 0, 32342.3, 0, 4, 0]),
-                     'm1_diag': np.array([0, 0, 32587.8, 0, 4, 0]),
+                     'm1_diag': np.array([0, 0, 32587.8, 0, -4, 0]),
                      # 'm1_diag': np.array([331.3, 0, 32587.8, 0, 4, 0]),
                      # 'm1_diag_slit': np.array([331.3, 0, 32587.8, 0, 4, 0])
                      }
@@ -132,7 +132,7 @@ class AriModel:
     m1 = ID29OE(bl=bl,
                 name='m1',
                 center=(0, 27850, 0),  # location (global XRT coords)
-                yaw=0, roll=+np.pi/2, pitch=np.radians(2),
+                yaw=0, roll=+np.pi/2, pitch=-np.radians(2),
                 material=gold,
                 limPhysX=[-60/2-10, 60/2+10], limOptX=[-15/2, 15/2],
                 limPhysY=[-400/2, 400/2], limOptY=[-240/2, 240/2],
@@ -182,8 +182,8 @@ class AriModel:
     # and potentially energy filter based on if a multilayer is inserted.
     m1_diag = ID29Screen(bl=bl,
                          name='m1_diag',
-                         center=(0, 32587.8, 0),  # location (global XRT coords)
-                         #center=(331.3, 32587.8, 0),  # location (global XRT coords)
+                         #center=(0, 32587.8, 0),  # location (global XRT coords)
+                         center=(331.3, 32587.8, 0),  # location (global XRT coords)
                          x=np.array([1, 0, 0]),
                          z=np.array([0, 0, 1]),
                          upstream_optic=m1,
