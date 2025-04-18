@@ -33,13 +33,10 @@ genericGR = xrt_material.Material('Ni', rho=8.908,
 # rotation around the x, y, z axes respectively that define the direction of the
 # incoming beam.
 ari_model_origins = {'source': np.array([0, 0, 0, 0, 0, 0]),
-                     'm1_upstream': np.array([0, 0, 27849, 0, 0, 0]),
-                     'm1': np.array([0, 0, 27850, 0, 0, 0]),
-                     'm1_dnstream': np.array([0, 0, 27851, 0, 0, 0]),
-                     # 'm1_baffles': np.array([314.13, 0, 32342.3, 0, 4, 0]),
-                     'm1_diag': np.array([0, 0, 32587.8, 0, -4, 0]),
-                     # 'm1_diag': np.array([331.3, 0, 32587.8, 0, 4, 0]),
-                     # 'm1_diag_slit': np.array([331.3, 0, 32587.8, 0, 4, 0])
+                     'm1': np.array([0, 0, 26591.243, 0, 0, 0]),
+                     # 'm1_baffles': np.array([-314.13, 0, 32342.3, 0, -4, 0]),
+                     'm1_diag': np.array([-121.426, 0, 29629.078, 0, -4, 0]),
+                     'm1_diag_slit': np.array([-331.3, 0, 32587.9, 0, -4, 0])
                      }
 
 
@@ -116,23 +113,12 @@ class AriModel:
                                                   'yaw': 0}},
                         origin=ari_model_origins['source'])
 
-    # Add one screen upstream of the M1 mirror for debugging
-    m1_upstream = ID29Screen(bl=bl,
-                             name='m1_diag',
-                             center=(0, 27849, 0),  # location (global XRT coords)
-                             x=np.array([1, 0, 0]),
-                             z=np.array([0, 0, 1]),
-                             upstream_optic=source,
-                             parameter_map={},
-                             origin=ari_model_origins['m1_upstream'],
-                             deflection='None')
-
     # Add the M1 to beamline object bl
     # TODO: This should be an elliptical mirror that focuses the beam.
     m1 = ID29OE(bl=bl,
                 name='m1',
-                center=(0, 27850, 0),  # location (global XRT coords)
-                yaw=0, roll=+np.pi/2, pitch=-np.radians(2),
+                center=(0, 26591.243, 0),  # location (global XRT coords)
+                yaw=0, roll=+np.pi/2, pitch=np.radians(2),
                 material=gold,
                 limPhysX=[-60/2-10, 60/2+10], limOptX=[-15/2, 15/2],
                 limPhysY=[-400/2, 400/2], limOptY=[-240/2, 240/2],
@@ -146,22 +132,10 @@ class AriModel:
                 origin=ari_model_origins['m1'],
                 deflection='inboard')
 
-    # Add one screen upstream of the M1 mirror for debugging
-    m1_dnstream = ID29Screen(bl=bl,
-                             name='m1_diag',
-                             center=(0, 27851, 0),  # location (global XRT coords)
-                             x=np.array([1, 0, 0]),
-                             z=np.array([0, 0, 1]),
-                             upstream_optic=m1,
-                             parameter_map={},
-                             origin=ari_model_origins['m1_dnstream'],
-                             deflection='None')
-
-
     # Add the M1 Baffle slit to beamline object bl
     #m1_baffles = ID29Aperture(bl=bl,
     #                          name='m1_baffles',
-    #                          center=(314.13, 32342.3, 0),  # location (XRT coords)
+    #                          center=(-628.26, 32342.3, 0),  # location (XRT coords)
     #                          x='auto', z='auto',
     #                          kind=['left', 'right', 'bottom', 'top'],
     #                          opening=[-50, 50,
@@ -182,8 +156,7 @@ class AriModel:
     # and potentially energy filter based on if a multilayer is inserted.
     m1_diag = ID29Screen(bl=bl,
                          name='m1_diag',
-                         #center=(0, 32587.8, 0),  # location (global XRT coords)
-                         center=(331.3, 32587.8, 0),  # location (global XRT coords)
+                         center=(121.426, 29629.078, 0),  # location (global XRT coords)
                          x=np.array([1, 0, 0]),
                          z=np.array([0, 0, 1]),
                          upstream_optic=m1,
@@ -192,16 +165,16 @@ class AriModel:
                          deflection='None')
 
     # Add slit at M1 diagnostic to block beam when diagnostic unit is in
-    #m1_diag_slit = ID29Aperture(bl=bl,
-    #                            name='m1_diag_slit',
-    #                            center=(331.3, 32587.8, 0),  # 0.1mm offset to diag
-    #                            x='auto', z='auto',
-    #                            kind=['left', 'right', 'bottom', 'top'],
-    #                            opening=[-50, 50, -50, 50],
-    #                            upstream_optic=m1,
-    #                            parameter_map={
-    #                                'opening': {'left': -50, 'right': 50,
-    #                                            'bottom': -50,
-    #                                            'top': (mirror1.diagnostic,
-    #                                                    'multi_trans')}},
-    #                            origin=ari_model_origins['m1_diag_slit'])
+    m1_diag_slit = ID29Aperture(bl=bl,
+                                name='m1_diag_slit',
+                                center=(121.426, 29629.2, 0),  # 0.1mm offset to diag
+                                x='auto', z='auto',
+                                kind=['left', 'right', 'bottom', 'top'],
+                                opening=[-50, 50, -50, 50],
+                                upstream_optic=m1,
+                                parameter_map={
+                                    'opening': {'left': -50, 'right': 50,
+                                                'bottom': -50,
+                                                'top': (mirror1.diagnostic,
+                                                        'multi_trans')}},
+                                origin=ari_model_origins['m1_diag_slit'])

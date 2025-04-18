@@ -122,7 +122,7 @@ class Test4Slit(TestBase):
     """
 
     def __init__(self):
-        super().__init__({'left': -50, 'right': 50,
+        super().__init__({'left': 50, 'right': -50,
                           'bottom': -50, 'top': 50})
 
         self.currents = [random.uniform(0.0, 1E-6),
