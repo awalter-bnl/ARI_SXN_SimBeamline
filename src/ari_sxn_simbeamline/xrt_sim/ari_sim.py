@@ -33,10 +33,10 @@ genericGR = xrt_material.Material('Ni', rho=8.908,
 # rotation around the x, y, z axes respectively that define the direction of the
 # incoming beam.
 ari_model_origins = {'source': np.array([0, 0, 0, 0, 0, 0]),
-                     'm1': np.array([0, 0, 26591.243, 0, 0, 0]),
-                     # 'm1_baffles': np.array([-314.13, 0, 32342.3, 0, -4, 0]),
-                     'm1_diag': np.array([-121.426, 0, 29629.078, 0, -4, 0]),
-                     'm1_diag_slit': np.array([-331.3, 0, 32587.9, 0, -4, 0])
+                     'm1': np.array([0, 0, 26591.24, 0, 0, 0]),
+                     # 'm1_baffles': np.array([-195.22, 0, 29383.0, 0, -4, 0]),
+                     'm1_diag': np.array([-121.43, 0, 29629.08, 0, -4, 0]),
+                     'm1_diag_slit': np.array([-121.43, 0, 29629.1, 0, -4, 0])
                      }
 
 
@@ -135,10 +135,10 @@ class AriModel:
     # Add the M1 Baffle slit to beamline object bl
     #m1_baffles = ID29Aperture(bl=bl,
     #                          name='m1_baffles',
-    #                          center=(-628.26, 32342.3, 0),  # location (XRT coords)
+    #                          center=(195.22, 29383.04, 0),
     #                          x='auto', z='auto',
     #                          kind=['left', 'right', 'bottom', 'top'],
-    #                          opening=[-50, 50,
+    #                          opening=[50, -50,
     #                                   -50, 50],
     #                          upstream_optic=m1,
     #                          parameter_map={
