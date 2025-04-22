@@ -64,9 +64,10 @@ def beam_to_xarray(beam_object, bins=(100, 100, 100),
          beam_object.__dict__['z'],
          np.ones(shape)*-origin[3],
          np.ones(shape)*origin[5],
-         np.zeros(shape)*origin[4]),
+         np.ones(shape)*origin[4]),
         axis=-1)
 
+    print(f'{xrt_global_coords=}')
     for i, xrt_global in enumerate(xrt_global_coords):
         if i == 0:
             nsls2_local_coords = np.array([_transform.xrt_global.to_nsls2_local(
@@ -77,6 +78,7 @@ def beam_to_xarray(beam_object, bins=(100, 100, 100),
                 np.array([_transform.xrt_global.to_nsls2_local(
                     xrt_global, origin=origin),]), axis=0)
 
+    print(f'{nsls2_local_coords=}')
     points = np.vstack([nsls2_local_coords[:, 0], nsls2_local_coords[:, 1],
                         beam_object.__dict__['E']]).T
 
@@ -369,11 +371,12 @@ class ID29Source(xrt_source.GeometricSource):
     """
     def __init__(self, parameter_map, *args, center=(0, 0, 0),
                  origin=np.array([0, 0, 0, 0, 0, 0]), deflection=None,
-                 **kwargs):
+                 upstream_optic=None, **kwargs):
         super().__init__(*args, center=center, **kwargs)
         self.beamOut = None  # Output in global coordinate!
         self._default_parameter_map = parameter_map
         self.origin = origin
+        self._upstream = upstream_optic  # Object from modified XRT
         if deflection:
             self.deflection = deflection
         else:
@@ -414,7 +417,7 @@ class ID29Source(xrt_source.GeometricSource):
 
         # TODO: Need to add the 'energies' tuple, with the form (energy,
         #  bandwidth), to this. Consider a look-up table for the bandwidth.
-        updated = _update_parameters(self, updated)
+        # updated = _update_parameters(self, updated)
 
         if updated:
             self.beamOut = self.shine()
@@ -555,7 +558,7 @@ class ID29OE(xrt_oes.OE):
             Potentially modified the input parameter updated if the update
             indicates a re-activation required.
         """
-        updated = _update_parameters(self, updated)
+        # updated = _update_parameters(self, updated)
 
         if updated:
             self.beamIn = getattr(self._upstream, 'beamOut')
@@ -836,7 +839,7 @@ class ID29Screen(xrt_screen.Screen):
             indicates a re-activation required.
 
         """
-        updated = _update_parameters(self, updated)
+        #  updated = _update_parameters(self, updated)
 
         if updated:
             self.beamIn = getattr(self._upstream, 'beamOut')

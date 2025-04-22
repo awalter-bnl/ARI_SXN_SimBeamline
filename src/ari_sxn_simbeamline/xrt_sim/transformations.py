@@ -101,7 +101,7 @@ def _nsls2_local_to_nsls2global(nsls2_local, origin):
     global_coords = origin_coords + np.dot(rotation_matrix, local_coords)
 
     # translate the local angles into global angles
-    global_angles = origin_angles + local_angles
+    global_angles = origin_angles + np.dot(rotation_matrix, local_angles)
 
     # combine the global coordinates and angles into a single array
     nsls2_global = np.concatenate((global_coords, global_angles))
@@ -164,7 +164,7 @@ def _nsls2_global_to_nsls2_local(nsls2_global, origin):
     local_coords = np.dot(rotation_matrix.T, global_coords-origin_coords)
 
     # translate the global angles into local angles
-    local_angles = global_angles - origin_angles
+    local_angles = np.dot(rotation_matrix.T, global_angles-origin_angles)
 
     # combine the global coordinates and angles into a single array
     nsls2_local = np.concatenate((local_coords, local_angles))
@@ -216,11 +216,12 @@ def _nsls2_global_to_xrt_global(nsls2_global):
     nsls2_angles = np.array(nsls2_global[3:])
 
     # rotation matrix which is swapping the z axis for the y axis
-    rotation_matrix = np.array([[-1, 0, 0], [0, 0, 1.0], [0, 1, 0]])
+    rotation_matrix = np.array([[-1.0, 0, 0], [0, 0, 1.0], [0, 1.0, 0]])
+    angle_rotation_matrix = np.array([[-1.0, 0, 0], [0, 0, -1.0], [0, -1.0, 0]])
 
     # rotate the NSLS-II coordinates and angles into XRT coordinates and angles
     xrt_coords = np.dot(rotation_matrix, nsls2_coords)
-    xrt_angles = np.dot(rotation_matrix, nsls2_angles)
+    xrt_angles = np.dot(angle_rotation_matrix, nsls2_angles)
 
     # combine the global coordinates and angles into a single array
     xrt_global = np.concatenate((xrt_coords, xrt_angles))
@@ -274,10 +275,11 @@ def _xrt_global_to_nsls2_global(xrt_global):
 
     # rotation matrix which is swapping the z axis for the y axis
     rotation_matrix = np.array([[-1, 0, 0], [0, 0, 1.0], [0, 1, 0]])
+    angle_rotation_matrix = np.array([[-1.0, 0, 0], [0, 0, -1.0], [0, -1.0, 0]])
 
     # rotate the NSLS-II coordinates and angles into XRT coordinates and angles
-    nsls2_coords = np.dot(rotation_matrix, xrt_coords)
-    nsls2_angles = np.dot(rotation_matrix, xrt_angles)
+    nsls2_coords = np.dot(rotation_matrix.T, xrt_coords)
+    nsls2_angles = np.dot(angle_rotation_matrix.T, xrt_angles)
 
     # combine the global coordinates and angles into a single array
     nsls2_global = np.concatenate((nsls2_coords, nsls2_angles))
@@ -293,13 +295,6 @@ class _Nsls2_local:
     coordinates and  NSLS-II global, XRT local and XRT global coordinates. The
     transformations are done using rotation matrices and translations.
 
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    None
     """
 
     def __init__(self):
@@ -398,13 +393,6 @@ class _Nsls2_global:
     coordinates and  NSLS-II local, XRT local and XRT global coordinates. The
     transformations are done using rotation matrices and translations.
 
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    None
     """
 
     def __init__(self):
@@ -501,13 +489,6 @@ class _Xrt_global:
     coordinates and  NSLS-II local, NSLS-II global and XRT local coordinates.
     The transformations are done using rotation matrices and translations.
 
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    None
     """
 
     def __init__(self):
@@ -599,13 +580,6 @@ class _Xrt_local:
     coordinates and  NSLS-II local, NSLS-II global and XRT global coordinates.
     The transformations are done using rotation matrices and translations.
 
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    None
     """
 
     def __init__(self):
@@ -713,13 +687,6 @@ class Transform:
     NSLS-II global, XRT local and XRT global coordinates. The transformations
     are done using rotation matrices and translations.
 
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    None
     """
 
     def __init__(self):

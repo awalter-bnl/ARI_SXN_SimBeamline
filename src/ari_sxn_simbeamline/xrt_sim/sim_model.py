@@ -32,7 +32,7 @@ genericGR = xrt_material.Material('Ni', rho=8.908,
 definition_dict = \
     {'source': {
         'type': ID29Source,
-        'kwargs': {'center': (0., 0., 0.),  # location (global XRT coords)
+        'kwargs': {'center': (0., 0., 0.),  # location (global XRT)
                    'pitch': 0, 'roll': 0, 'yaw': 0,
                    'nrays': 10000,
                    'distx': 'normal', 'dx': 0.30,  # linear profile
@@ -53,13 +53,40 @@ definition_dict = \
                    'deflection': None}},
      'm1_screen': {
         'type': ID29Screen,
-        'kwargs': {'center': (0, 26591, 0),  # location (global XRT coords)
+        'kwargs': {'center': (0., 26591., 0.),  # location (global XRT)
                    'x': np.array([1, 0, 0]),
                    'z': np.array([0, 0, 1]),
                    'upstream_optic': 'source',
                    'parameter_map': {},
                    'origin': np.array([0, 0, 26591, 0, 0, 0]),
-                   'deflection': None}}
+                   'deflection': None}},
+     'm1': {
+        'type': ID29OE,
+         'kwargs': {'center': (0., 26591.243, 0.),  # location (global XRT)
+                    'yaw': 0, 'roll': +np.pi/2, 'pitch': np.radians(2),
+                    'material': gold,
+                    'limPhysX': [-60/2-10, 60/2+10],
+                    'limOptX': [-15/2, 15/2],
+                    'limPhysY': [-400/2, 400/2], 'limOptY': [-240/2, 240/2],
+                    'shape': 'rect',
+                    'upstream_optic': 'source',
+                    'parameter_map': {'center': {'x': (mirror1, 'x'),
+                                                 'y': (mirror1, 'y'),
+                                                 'z': 0},
+                                      'angles': {'Rx': 0,
+                                                 'Ry': (mirror1, 'Ry'),
+                                                 'Rz': (mirror1, 'Rz')}},
+                    'origin': np.array([0, 0, 26591.24, 0, 0, 0]),
+                    'deflection': 'inboard'}},
+     'm1_diag': {
+         'type': ID29Screen,
+         'kwargs': {'center': (121.426, 29629.078, 0),  # location (global XRT)
+                    'x': np.array([1, 0, 0]),
+                    'z': np.array([0, 0, 1]),
+                    'upstream_optic': 'm1',
+                    'parameter_map': {},
+                    'origin': np.array([-121.43, 0, 29629.08, 0, 4, 0]),
+                    'deflection': None}},
      }
 
 
@@ -76,7 +103,7 @@ class BeamlineModel:
 
     Parameters
     ----------
-    definition_dict : dict
+    definitions : dict
         A dictionary that defines the beamline components and their
         initialization parameters. It has the form:
                 {'1st_component_name': {
@@ -118,17 +145,17 @@ class BeamlineModel:
 
     """
 
-    def __init__(self, definition_dict):
+    def __init__(self, definitions):
         """
         Initialize the beamline model.
 
         Parameters
         ----------
-        definition_dict : xrt_raycing.Beamline
+        definitions : xrt_raycing.Beamline
             A dictionary of the form described in the class definition.
         """
         # parse any values in definition_dict that need it.
-        for component_name, initial_dict in definition_dict.items():
+        for component_name, initial_dict in definitions.items():
             # parse the parameter_map values
             if initial_dict['kwargs']['parameter_map']:
                 initial_dict['kwargs']['parameter_map'] = \
@@ -138,7 +165,7 @@ class BeamlineModel:
             if initial_dict['kwargs']['deflection'] is None:
                 initial_dict['kwargs']['deflection'] = 'upward'
 
-        self.definition_dict = definition_dict
+        self.definition_dict = definitions
         self.initialize_beamline(updated=True)
 
     def initialize_beamline(self, updated=False):
