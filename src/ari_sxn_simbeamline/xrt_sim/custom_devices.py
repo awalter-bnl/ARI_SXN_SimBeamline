@@ -67,7 +67,6 @@ def beam_to_xarray(beam_object, bins=(100, 100, 100),
          np.ones(shape)*origin[4]),
         axis=-1)
 
-    print(f'{xrt_global_coords=}')
     for i, xrt_global in enumerate(xrt_global_coords):
         if i == 0:
             nsls2_local_coords = np.array([_transform.xrt_global.to_nsls2_local(
@@ -78,7 +77,6 @@ def beam_to_xarray(beam_object, bins=(100, 100, 100),
                 np.array([_transform.xrt_global.to_nsls2_local(
                     xrt_global, origin=origin),]), axis=0)
 
-    print(f'{nsls2_local_coords=}')
     points = np.vstack([nsls2_local_coords[:, 0], nsls2_local_coords[:, 1],
                         beam_object.__dict__['E']]).T
 
@@ -699,7 +697,7 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
             indicates a re-activation required.
 
         """
-        updated = _update_parameters(self, updated)
+        # updated = _update_parameters(self, updated)
 
         if updated:
             self.beamIn = getattr(self._upstream, 'beamOut')

@@ -133,7 +133,7 @@ class AriModel:
                 deflection='inboard')
 
     # Add the M1 Baffle slit to beamline object bl
-    #m1_baffles = ID29Aperture(bl=bl,
+    # m1_baffles = ID29Aperture(bl=bl,
     #                          name='m1_baffles',
     #                          center=(195.22, 29383.04, 0),
     #                          x='auto', z='auto',

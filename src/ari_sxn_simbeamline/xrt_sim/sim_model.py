@@ -78,6 +78,20 @@ definition_dict = \
                                                  'Rz': (mirror1, 'Rz')}},
                     'origin': np.array([0, 0, 26591.24, 0, 0, 0]),
                     'deflection': 'inboard'}},
+     'm1_baffles': {
+         'type': ID29Aperture,
+         'kwargs': {'center': (195.22, 29383.04, 0),
+                    'x': 'auto', 'z': 'auto',
+                    'kind': ['left', 'right', 'bottom', 'top'],
+                    'opening': [50.0, -50.0, -50.0, 50.0],
+                    'upstream_optic': 'm1',
+                    'parameter_map': {
+                        'opening': {'left': (mirror1.baffles, 'left'),
+                                    'right': (mirror1.baffles, 'right'),
+                                    'bottom': (mirror1.baffles, 'bottom'),
+                                    'top': (mirror1.baffles, 'top')}},
+                    'origin': np.array([-195.22, 0, 29383.0, 0, -4, 0]),
+                    'deflection': None}},
      'm1_diag': {
          'type': ID29Screen,
          'kwargs': {'center': (121.426, 29629.078, 0),  # location (global XRT)
@@ -87,6 +101,19 @@ definition_dict = \
                     'parameter_map': {},
                     'origin': np.array([-121.43, 0, 29629.08, 0, 4, 0]),
                     'deflection': None}},
+     'm1_diag_slit': {
+         'type': ID29Aperture,
+         'kwargs': {'center': (121.426, 29629.2, 0),  # 0.1mm offset to diag
+                    'x': 'auto', 'z': 'auto',
+                    'kind': ['left', 'right', 'bottom', 'top'],
+                    'opening': [-50.0, 50.0, -50.0, 50.0],
+                    'upstream_optic': 'm1',
+                    'parameter_map': {
+                        'opening': {'left': -50, 'right': 50, 'bottom': -50,
+                                    'top': (mirror1.diagnostic, 'multi_trans')}
+                                     },
+                    'origin': np.array([-121.43, 0, 29629.1, 0, -4, 0]),
+                    'deflection': None}}
      }
 
 
