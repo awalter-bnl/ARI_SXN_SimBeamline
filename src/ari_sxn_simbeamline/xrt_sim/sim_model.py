@@ -97,7 +97,7 @@ class BeamlineModel:
         Parameters
         ----------
         updated: a boolean, i.e., False (by default) or True.
-            Boolean that indicates if any of the parameters where updated,
+            Boolean that indicates if any of the parameters were updated,
             Potentially modified and returned.
 
         Returns
