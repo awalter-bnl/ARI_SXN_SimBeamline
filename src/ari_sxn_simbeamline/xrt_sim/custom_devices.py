@@ -392,35 +392,19 @@ class ID29Source(xrt_source.GeometricSource):
 
         raise ValueError('The _parameter_map can not be reset!')
 
-    def activate(self, updated=False):
+    def activate(self):
         """
         A method adding or modifying the beamOut attribute.
 
         This method modifies the Object of beamline source if any parameters had
         been changed and then updates the beamOut accordingly.
 
-        Parameters
-        ----------
-
-        updated: a boolean, i.e., False (by default) or True.
-            The boolean indicates the beamOut needs to be updated as the source
-            has been modified. Potentially modified and returned.
-
-        Returns
-        -------
-        updated : Boolean
-            Potentially modified the input parameter updated if the update
-            indicates a re-activation required.
         """
 
         # TODO: Need to add the 'energies' tuple, with the form (energy,
         #  bandwidth), to this. Consider a look-up table for the bandwidth.
-        # updated = _update_parameters(self, updated)
 
-        if updated:
-            self.beamOut = self.shine()
-
-        return updated
+        self.beamOut = self.shine()
 
 
 class ID29OE(xrt_oes.OE):
@@ -537,32 +521,16 @@ class ID29OE(xrt_oes.OE):
 
         raise ValueError('The _parameter_map can not be reset!')
 
-    def activate(self, updated=False):
+    def activate(self):
         """
         A method adding or modifying the beamOut attribute.
 
         This method modifies the Object of beamline optics if any parameters had
         been changed and then updates the outcome of Beam Object accordingly.
-
-        Parameters
-        ----------
-        updated: a boolean, i.e., False (by default) or True.
-        The True means the outcome of Beam Object needs to be updated
-        as the beamline optics has been modified.
-
-        Returns
-        -------
-        updated : Boolean
-            Potentially modified the input parameter updated if the update
-            indicates a re-activation required.
         """
-        # updated = _update_parameters(self, updated)
 
-        if updated:
-            self.beamIn = getattr(self._upstream, 'beamOut')
-            self.beamOut, self.beamOutloc = self.reflect(self.beamIn)
-
-        return updated
+        self.beamIn = getattr(self._upstream, 'beamOut')
+        self.beamOut, self.beamOutloc = self.reflect(self.beamIn)
 
 
 class ID29Aperture(xrt_aperture.RectangularAperture):
@@ -675,35 +643,17 @@ class ID29Aperture(xrt_aperture.RectangularAperture):
     def _parameter_map(self, new_parameter_map):  # used to take input manually
         raise ValueError('The _parameter_map can not be reset!')
 
-    def activate(self, updated=False):
+    def activate(self):
         """
         A method adding or modifying the beamOut attribute.
 
         This method modifies the Object of beamline aperture if any parameters
         had been changed and then updates the outcome of Beam Object
         accordingly.
-
-
-        Parameters
-        ----------
-        updated: a boolean, i.e., False (by default) or True.
-        The Ture means the outcome of Beam Object needs to be updated
-        as the beamline aperture has been modified.
-
-        Returns
-        -------
-        updated : Boolean
-            Potentially modified the input parameter updated if the update
-            indicates a re-activation required.
-
         """
-        # updated = _update_parameters(self, updated)
 
-        if updated:
-            self.beamIn = getattr(self._upstream, 'beamOut')
-            self.beamOut = self.propagate(self.beamIn)
-
-        return updated
+        self.beamIn = getattr(self._upstream, 'beamOut')
+        self.beamOut = self.propagate(self.beamIn)
 
 
 class ID29Screen(xrt_screen.Screen):
@@ -814,7 +764,7 @@ class ID29Screen(xrt_screen.Screen):
     def _parameter_map(self, new_parameter_map):  # used to take input manually
         raise ValueError('The _parameter_map can not be reset!')
 
-    def activate(self, updated=False):
+    def activate(self):
         """
 
         A method adding or modifying the beamOut attribute.
@@ -822,25 +772,7 @@ class ID29Screen(xrt_screen.Screen):
         This method modifies the Object of beamline screen if any parameters
         had been changed and then updates the outcome of Beam Object
         accordingly.
-
-
-        Parameters
-        ----------
-        updated: a boolean, i.e., False (by default) or True.
-        True means the outcome of Beam Object needs to be updated
-        as the beamline aperture has been modified.
-
-        Returns
-        -------
-        updated : Boolean
-            Potentially modified the input parameter updated if the update
-            indicates a re-activation required.
-
         """
-        #  updated = _update_parameters(self, updated)
 
-        if updated:
-            self.beamIn = getattr(self._upstream, 'beamOut')
-            self.beamOut = self.expose(self.beamIn)
-
-        return updated
+        self.beamIn = getattr(self._upstream, 'beamOut')
+        self.beamOut = self.expose(self.beamIn)
